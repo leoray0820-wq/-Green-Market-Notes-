@@ -1,710 +1,1001 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>永續行動影響力 | 雲端稽核版</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        forest: { 50: '#f0f7f4', 100: '#e0efe9', 500: '#2d6a4f', 600: '#1b4332', 700: '#081c15' },
-                        emerald: { 500: '#10b981' }
-                    }
-                }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>市集銷售隨手記 Market Sales & Stock Tracker</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts Inter & Noto Sans TC -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              500: '#22c55e',
+              600: '#16a34a',
+              700: '#15803d',
+              800: '#166534',
             }
+          },
+          fontFamily: {
+            sans: ['Noto Sans TC', 'Inter', 'sans-serif'],
+          }
         }
-    </script>
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+  </style>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans min-h-screen">
+<body class="bg-stone-50 text-stone-800 font-sans min-h-screen flex flex-col justify-between selection:bg-emerald-100 selection:text-emerald-800">
 
-    <!-- Header -->
-    <header class="bg-forest-600 text-white shadow-md sticky top-0 z-40">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-wrap justify-between items-center gap-4">
-            <div class="flex items-center space-x-3">
-                <div class="p-2 bg-emerald-500 rounded-lg text-forest-700">
-                    <i data-lucide="shield-check" class="w-6 h-6"></i>
-                </div>
-                <div>
-                    <h1 class="text-xl font-bold tracking-wide">永續行動影響力</h1>
-                    <p class="text-xs text-emerald-200">GRI 306 & TNFD 雲端稽核與資訊透明追溯系統</p>
-                </div>
-            </div>
-            
-            <div class="flex items-center space-x-2 flex-wrap">
-                <button onclick="loadCloudData()" class="bg-forest-500 hover:bg-forest-700 text-white border border-emerald-400 px-3 py-2 rounded-lg text-sm font-medium flex items-center shadow-sm transition">
-                    <i data-lucide="refresh-cw" class="w-4 h-4 mr-1.5" id="sync-spinner"></i> 同步雲端
-                </button>
-                <button onclick="openModal('waste')" class="bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-2 rounded-lg text-sm font-medium flex items-center shadow-sm transition">
-                    <i data-lucide="plus-circle" class="w-4 h-4 mr-1.5"></i> 減碳行動
-                </button>
-                <button onclick="openModal('bio')" class="bg-forest-700 hover:bg-black text-white px-3 py-2 rounded-lg text-sm font-medium flex items-center shadow-sm transition">
-                    <i data-lucide="bug" class="w-4 h-4 mr-1.5"></i> 生態觀察
-                </button>
-            </div>
+  <!-- Main Navigation & Header -->
+  <header class="bg-emerald-800 text-white shadow-md sticky top-0 z-40">
+    <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="bg-amber-500 text-stone-900 w-10 h-10 rounded-xl flex items-center justify-center font-bold text-xl shadow-inner">
+          <i class="fa-solid fa-store"></i>
         </div>
-    </header>
-
-    <!-- Main Container -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-
-        <!-- Global Filter Bar -->
-        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 flex flex-wrap items-center justify-between gap-4">
-            <div class="flex items-center space-x-3">
-                <div class="p-2 bg-slate-100 text-slate-600 rounded-lg">
-                    <i data-lucide="filter" class="w-5 h-5"></i>
-                </div>
-                <div>
-                    <h3 class="text-sm font-bold text-slate-800">組織單位篩選面板</h3>
-                    <p class="text-xs text-slate-400">切換單位時，下方 4 大趨勢與分佈圖表將同步連動</p>
-                </div>
-            </div>
-            <div class="flex items-center space-x-3 flex-wrap">
-                <div>
-                    <label class="block text-[10px] font-semibold text-slate-400 uppercase mb-1">記錄單位</label>
-                    <select id="filter-dept" onchange="filterData()" class="border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-emerald-500 outline-none bg-slate-50">
-                        <option value="">總覽</option>
-                    </select>
-                </div>
-            </div>
+        <div>
+          <h1 class="font-bold text-lg leading-tight">市集銷售隨手記</h1>
+          <p class="text-xs text-emerald-200 flex items-center gap-1.5">
+            <span id="sync-status-indicator" class="w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block animate-pulse"></span>
+            <span id="sync-status-text">雲端連線中...</span>
+          </p>
         </div>
+      </div>
 
-        <!-- Methodology & Audit Notice Card -->
-        <div class="bg-emerald-900/5 border border-emerald-500/20 rounded-2xl p-6">
-            <div class="flex items-center justify-between mb-4">
-                <div class="flex items-center space-x-2">
-                    <i data-lucide="file-check-2" class="w-5 h-5 text-emerald-600"></i>
-                    <h3 class="font-bold text-slate-800 text-sm tracking-wide">第三方稽核與方法學合規聲明 (GRI & TNFD Framework)</h3>
-                </div>
-                <span class="text-[10px] bg-emerald-100 text-emerald-800 font-semibold px-2 py-0.5 rounded-full">符合 GRI 306 & TNFD 規範</span>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-slate-600">
-                <div class="bg-white/80 p-3.5 rounded-xl border border-emerald-100">
-                    <p class="font-bold text-slate-700 mb-1 flex items-center">
-                        <i data-lucide="globe" class="w-3.5 h-3.5 mr-1 text-emerald-600"></i> 1. 國際公認框架 (Baseline)
-                    </p>
-                    <p class="leading-relaxed text-slate-500">減碳遵循 <strong class="text-slate-700">IPCC 2006</strong> 掩埋替代法；生態觀察依循 <strong class="text-slate-700">TNFD</strong> 自然相關財務揭露之生物多樣性指標。</p>
-                </div>
-                <div class="bg-white/80 p-3.5 rounded-xl border border-emerald-100">
-                    <p class="font-bold text-slate-700 mb-1 flex items-center">
-                        <i data-lucide="shield-alert" class="w-3.5 h-3.5 mr-1 text-emerald-600"></i> 2. 保守估計原則 (Conservativeness)
-                    </p>
-                    <p class="leading-relaxed text-slate-500">減碳效益採用保守估計之 <strong class="text-slate-700">2.1 kg CO₂e / kg</strong> 替代係數，生態活躍度透過五星量化評分進行客觀追蹤。</p>
-                </div>
-                <div class="bg-white/80 p-3.5 rounded-xl border border-emerald-100">
-                    <p class="font-bold text-slate-700 mb-1 flex items-center">
-                        <i data-lucide="box" class="w-3.5 h-3.5 mr-1 text-emerald-600"></i> 3. 清楚界定系統邊界 (System Boundary)
-                    </p>
-                    <p class="leading-relaxed text-slate-500">涵蓋場域有機質轉化減碳量、土壤有機碳增匯效益，以及模組化設備周邊之生物多樣性動態存證。</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- KPI Impact Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div class="bg-white rounded-xl shadow-sm p-6 border border-slate-100 flex items-center space-x-4">
-                <div class="p-3 bg-emerald-100 text-emerald-600 rounded-xl"><i data-lucide="scale" class="w-8 h-8"></i></div>
-                <div>
-                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">累計廢棄物轉化</p>
-                    <p class="text-2xl font-bold text-slate-800" id="kpi-total-waste">0.0 <span class="text-sm font-normal text-slate-500">kg</span></p>
-                    <p class="text-xs text-emerald-600 mt-1">GRI 306-4 規範追溯</p>
-                </div>
-            </div>
-
-            <div class="bg-white rounded-xl shadow-sm p-6 border border-slate-100 flex items-center space-x-4">
-                <div class="p-3 bg-teal-100 text-teal-600 rounded-xl"><i data-lucide="cloud-off" class="w-8 h-8"></i></div>
-                <div>
-                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">範疇三減碳效益</p>
-                    <p class="text-2xl font-bold text-slate-800" id="kpi-carbon-reduced">0.0 <span class="text-sm font-normal text-slate-500">kg CO₂e</span></p>
-                    <p class="text-xs text-teal-600 mt-1">IPCC 保守替代係數 2.1 kgCO₂e/kg</p>
-                </div>
-            </div>
-
-            <div class="bg-white rounded-xl shadow-sm p-6 border border-slate-100 flex items-center space-x-4">
-                <div class="p-3 bg-amber-100 text-amber-600 rounded-xl"><i data-lucide="sparkles" class="w-8 h-8"></i></div>
-                <div>
-                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">產出有機蚓糞肥</p>
-                    <p class="text-2xl font-bold text-slate-800" id="kpi-vermicompost">0.0 <span class="text-sm font-normal text-slate-500">kg</span></p>
-                    <p class="text-xs text-amber-600 mt-1">土壤有機碳 SOC 增匯</p>
-                </div>
-            </div>
-
-            <div class="bg-white rounded-xl shadow-sm p-6 border border-slate-100 flex items-center space-x-4">
-                <div class="p-3 bg-indigo-100 text-indigo-600 rounded-xl"><i data-lucide="camera" class="w-8 h-8"></i></div>
-                <div>
-                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">雲端憑證照片</p>
-                    <p class="text-2xl font-bold text-slate-800" id="kpi-bio-logs">0 <span class="text-sm font-normal text-slate-500">張存證</span></p>
-                    <p class="text-xs text-indigo-600 mt-1">TNFD 資訊透明度</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- 4大圖表全景區塊 (同時顯示 4 大圖表) -->
-        <div class="space-y-6">
-            <h2 class="text-lg font-bold text-slate-800 flex items-center">
-                <i data-lucide="layout-grid" class="w-5 h-5 mr-2 text-forest-500"></i>
-                永續與生態 4 大核心圖表總覽
-            </h2>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                
-                <!-- 圖 1: 廢棄物轉化趨勢分析 (長條圖) -->
-                <div class="bg-white rounded-2xl shadow-sm p-5 border border-slate-100 flex flex-col justify-between">
-                    <div>
-                        <h3 class="text-sm font-bold text-slate-800 mb-1 flex items-center">
-                            <i data-lucide="trending-up" class="w-4 h-4 mr-1.5 text-emerald-600"></i>
-                            廢棄物轉化趨勢分析
-                        </h3>
-                        <p class="text-[11px] text-slate-400 mb-3">每日資材處理重量 (kg)</p>
-                    </div>
-                    <div class="h-56">
-                        <canvas id="chart-waste-trend"></canvas>
-                    </div>
-                </div>
-
-                <!-- 圖 2: 資材種類佔比分析 (圓餅圖) -->
-                <div class="bg-white rounded-2xl shadow-sm p-5 border border-slate-100 flex flex-col justify-between">
-                    <div>
-                        <h3 class="text-sm font-bold text-slate-800 mb-1 flex items-center">
-                            <i data-lucide="pie-chart" class="w-4 h-4 mr-1.5 text-emerald-600"></i>
-                            資材種類佔比分析
-                        </h3>
-                        <p class="text-[11px] text-slate-400 mb-3">廢棄物與有機資材分佈</p>
-                    </div>
-                    <div class="h-56 relative flex items-center justify-center">
-                        <canvas id="chart-waste-category"></canvas>
-                    </div>
-                </div>
-
-                <!-- 圖 3: 生物多樣性活躍度評分趨勢 (折線圖) -->
-                <div class="bg-white rounded-2xl shadow-sm p-5 border border-slate-100 flex flex-col justify-between">
-                    <div>
-                        <h3 class="text-sm font-bold text-slate-800 mb-1 flex items-center">
-                            <i data-lucide="activity" class="w-4 h-4 mr-1.5 text-indigo-600"></i>
-                            生物多樣性活躍度評分趨勢
-                        </h3>
-                        <p class="text-[11px] text-slate-400 mb-3">生態活躍度評估 (1-5 星星累計)</p>
-                    </div>
-                    <div class="h-56">
-                        <canvas id="chart-bio-trend"></canvas>
-                    </div>
-                </div>
-
-                <!-- 圖 4: 生態觀察主題與物種佔比 (圓餅圖) -->
-                <div class="bg-white rounded-2xl shadow-sm p-5 border border-slate-100 flex flex-col justify-between">
-                    <div>
-                        <h3 class="text-sm font-bold text-slate-800 mb-1 flex items-center">
-                            <i data-lucide="bug" class="w-4 h-4 mr-1.5 text-indigo-600"></i>
-                            生態觀察主題與物種佔比
-                        </h3>
-                        <p class="text-[11px] text-slate-400 mb-3">觀察物種與生態現象佔比</p>
-                    </div>
-                    <div class="h-56 relative flex items-center justify-center">
-                        <canvas id="chart-bio-category"></canvas>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-
-        <!-- Data Table Section -->
-        <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-            <div class="p-6 border-b border-slate-100 flex flex-wrap justify-between items-center gap-4">
-                <div>
-                    <h2 class="text-base font-bold text-slate-800">歷史稽核數據清單</h2>
-                    <p class="text-xs text-slate-400">數據已同步至 Google 試算表，圖片已存入 Google 雲端硬碟</p>
-                </div>
-                <div class="flex items-center space-x-3">
-                    <input type="text" id="table-search" oninput="filterData()" placeholder="搜尋類別、部門、填寫人或備註..." class="border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
-                    <button onclick="exportCSV()" class="bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center shadow-sm transition">
-                        <i data-lucide="download" class="w-4 h-4 mr-2"></i> 導出紀錄
-                    </button>
-                </div>
-            </div>
-
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse text-sm">
-                    <thead>
-                        <tr class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider border-b border-slate-100">
-                            <th class="p-4">雲端憑證照片</th>
-                            <th class="p-4">日期</th>
-                            <th class="p-4">記錄類型</th>
-                            <th class="p-4">細項類別 / 主題</th>
-                            <th class="p-4">數量 / 評分</th>
-                            <th class="p-4">估算減碳量</th>
-                            <th class="p-4">記錄部門</th>
-                            <th class="p-4">填寫人</th>
-                            <th class="p-4">現場備註</th>
-                        </tr>
-                    </thead>
-                    <tbody id="data-table-body" class="divide-y divide-slate-100 text-slate-700">
-                        <!-- Dynamic Rows -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </main>
-
-    <!-- Modal Form -->
-    <div id="modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
-        <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
-            <div class="bg-forest-600 text-white p-4 px-6 flex justify-between items-center">
-                <h3 id="modal-title" class="text-lg font-bold flex items-center">
-                    <i data-lucide="cloud-upload" class="w-5 h-5 mr-2"></i> 雲端數據填報
-                </h3>
-                <button onclick="closeModal()" class="text-slate-200 hover:text-white"><i data-lucide="x" class="w-6 h-6"></i></button>
-            </div>
-
-            <form id="record-form" onsubmit="handleCloudSubmit(event)" class="p-6 space-y-4 overflow-y-auto flex-1">
-                <input type="hidden" id="form-type" value="waste">
-
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">日期</label>
-                    <input type="date" id="form-date" required class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
-                </div>
-
-                <div id="field-category-waste">
-                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">廢棄物/資材種類</label>
-                    <select id="form-category-waste" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
-                        <option value="咖啡渣">咖啡渣</option>
-                        <option value="茶渣">茶葉渣/茶包</option>
-                        <option value="生廚餘">生廚餘 (植物性)</option>
-                        <option value="熟廚餘">熟廚餘</option>
-                        <option value="落葉與枯枝">落葉與枯枝</option>
-                    </select>
-                </div>
-
-                <div id="field-amount-waste">
-                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">投放重量 (kg)</label>
-                    <input type="number" step="0.1" id="form-amount" placeholder="例如：12.5" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
-                </div>
-
-                <div id="field-bio-details" class="hidden space-y-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">觀察主題 / 物種名稱</label>
-                        <input type="text" id="form-bio-title" placeholder="例如：蚯蚓翻耕活躍度 / 土壤蕈類觀察" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">生態活躍度評分 (1-5 星)</label>
-                        <select id="form-worm-rating" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
-                            <option value="5">⭐⭐⭐⭐⭐ (極度活躍/集群明顯)</option>
-                            <option value="4">⭐⭐⭐⭐ (良好進食)</option>
-                            <option value="3">⭐⭐⭐ (正常活動)</option>
-                            <option value="2">⭐⭐ (活動偏緩慢)</option>
-                            <option value="1">⭐ (需要調整環境濕度/通氣)</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- 現場照片欄位 (強迫必填照片) -->
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1 flex items-center justify-between">
-                        <span>現場照片存證 (自動上傳雲端硬碟)</span>
-                        <span class="text-rose-500 font-bold">* 必填照片憑證</span>
-                    </label>
-                    <input type="file" id="form-photo" accept="image/*" required onchange="compressImage(event)" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-forest-50 file:text-forest-600 hover:file:bg-forest-100">
-                    <div id="photo-preview-container" class="mt-3 hidden relative w-32 h-32 rounded-lg border border-slate-200 overflow-hidden">
-                        <img id="photo-preview" src="" class="w-full h-full object-cover">
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">記錄單位</label>
-                        <input type="text" id="form-dept" placeholder="行政總務部" required class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">填寫人</label>
-                        <input type="text" id="form-author" placeholder="王小明" required class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">備註 / 生物狀態紀錄</label>
-                    <textarea id="form-notes" rows="3" placeholder="紀錄現場氣味、濕度或特異觀察..." class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none"></textarea>
-                </div>
-
-                <div class="pt-4 flex justify-end space-x-3">
-                    <button type="button" onclick="closeModal()" class="px-4 py-2 border border-slate-200 text-slate-600 rounded-lg text-sm font-medium hover:bg-slate-50">取消</button>
-                    <button type="submit" id="submit-btn" class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-sm font-medium shadow-sm">確認並上傳雲端</button>
-                </div>
-            </form>
-        </div>
+      <!-- Navigation Tabs -->
+      <nav class="flex bg-emerald-900/60 p-1 rounded-xl text-sm font-medium">
+        <button id="tab-btn-sales" onclick="switchTab('sales')" class="px-3.5 py-1.5 rounded-lg transition-all duration-200 bg-white text-emerald-900 shadow font-semibold">
+          <i class="fa-solid fa-calculator mr-1"></i>銷售主頁
+        </button>
+        <button id="tab-btn-history" onclick="switchTab('history')" class="px-3.5 py-1.5 rounded-lg transition-all duration-200 text-emerald-100 hover:text-white">
+          <i class="fa-solid fa-chart-line mr-1"></i>盤點與統計
+        </button>
+      </nav>
     </div>
+  </header>
 
-    <!-- Frontend Script -->
-    <script>
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxlHKxhZqk3HZL_t8oDjFuMdtHBPEe22MCTQnSOPSN0PRdQG0jUi9qWHz-800zHqmc_/exec";
+  <!-- Dynamic Summary Banner -->
+  <div class="bg-amber-50 border-b border-amber-200/80 px-4 py-3 shadow-sm">
+    <div class="max-w-5xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-baseline space-x-2">
+        <span class="text-xs font-semibold text-stone-600 uppercase tracking-wide">理論應收總金額:</span>
+        <span id="grand-total" class="text-3xl font-black text-emerald-700">NT$ 0</span>
+      </div>
+      <div class="flex items-center space-x-4 text-sm text-stone-600">
+        <div class="bg-white/80 px-3 py-1 rounded-lg border border-amber-200">
+          總銷售件數: <span id="grand-count" class="font-extrabold text-stone-800">0</span> 件
+        </div>
+        <div class="bg-white/80 px-3 py-1 rounded-lg border border-amber-200">
+          預計剩餘總庫存: <span id="grand-remaining-stock" class="font-extrabold text-amber-700">0</span> 件
+        </div>
+      </div>
+    </div>
+  </div>
 
-        let cloudRecords = [];
-        let compressedPhotoBase64 = '';
-        let cWasteTrend = null, cWasteCat = null, cBioTrend = null, cBioCat = null;
+  <!-- Main Content Container -->
+  <main class="max-w-5xl mx-auto px-4 py-6 flex-grow w-full">
 
-        document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('form-date').value = new Date().toISOString().split('T')[0];
-            loadCloudData();
-            lucide.createIcons();
+    <!-- TAB 1: SALES MAIN PAGE -->
+    <section id="tab-sales" class="space-y-6">
+
+      <!-- Quick Add New Product Bar -->
+      <div class="bg-white p-5 rounded-2xl shadow-sm border border-stone-200">
+        <h2 class="text-sm font-bold text-stone-700 mb-3 flex items-center gap-2">
+          <i class="fa-solid fa-cart-plus text-emerald-600"></i> 新增展售商品品項與備貨量
+        </h2>
+        <form id="add-product-form" onsubmit="handleCreateProduct(event)" class="grid grid-cols-1 sm:grid-cols-12 gap-3">
+          <div class="sm:col-span-5">
+            <input type="text" id="new-product-name" placeholder="商品名稱 (例: 芭蕉乾)" required
+              class="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm">
+          </div>
+          <div class="sm:col-span-3">
+            <div class="relative">
+              <span class="absolute left-3 top-2.5 text-stone-400 text-sm">NT$</span>
+              <input type="number" id="new-product-price" min="0" step="1" placeholder="單價" required
+                class="w-full pl-11 pr-3 py-2.5 rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm">
+            </div>
+          </div>
+          <div class="sm:col-span-2">
+            <input type="number" id="new-product-stock" min="0" step="1" placeholder="進貨/備貨量" required
+              class="w-full px-3 py-2.5 rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm">
+          </div>
+          <div class="sm:col-span-2">
+            <button type="submit" class="w-full h-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-4 rounded-xl shadow transition text-sm flex items-center justify-center gap-1">
+              <i class="fa-solid fa-plus"></i> 加入
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Products Grid -->
+      <div>
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-base font-bold text-stone-800 flex items-center gap-2">
+            <i class="fa-solid fa-boxes-stacked text-amber-600"></i> 目前展售商品列表
+          </h2>
+          <span class="text-xs text-stone-500">點擊 ＋ / － 按鈕即時紀錄並同步雲端數據</span>
+        </div>
+
+        <div id="product-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Empty State by Default -->
+          <div class="col-span-full py-12 text-center text-stone-400 bg-white rounded-2xl border border-dashed border-stone-300">
+            <i class="fa-solid fa-box-open text-4xl mb-3 text-stone-300"></i>
+            <p class="font-medium text-stone-500">目前展售列表為空白</p>
+            <p class="text-xs text-stone-400 mt-1">請使用上方「新增展售商品品項與備貨量」表單建立新商品</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: RECONCILIATION & HISTORY -->
+    <section id="tab-history" class="space-y-6 hidden">
+      
+      <!-- End of Day Reconciliation Box -->
+      <div class="bg-gradient-to-br from-amber-50 to-orange-50 p-5 rounded-2xl shadow-sm border border-amber-200/80">
+        <h2 class="text-base font-bold text-amber-900 mb-2 flex items-center gap-2">
+          <i class="fa-solid fa-calculator text-amber-600"></i> 收攤清點與現金對帳工具
+        </h2>
+        <p class="text-xs text-amber-700 mb-4">輸入您收攤現場點算後的實際現金總額，自動比對帳目是否有短少或溢收 (盤盈/盤虧)。</p>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-white p-4 rounded-xl border border-amber-200">
+          <div>
+            <span class="text-xs text-stone-500 block mb-1">理論應收總金額</span>
+            <span id="reconcile-expected-total" class="text-xl font-extrabold text-emerald-700">NT$ 0</span>
+          </div>
+          <div>
+            <label class="text-xs font-bold text-stone-700 block mb-1">實際抽屜點算現金總額 (NT$)</label>
+            <input type="number" id="actual-cash-input" oninput="calculateDifference()" placeholder="輸入金額..."
+              class="w-full px-3 py-1.5 rounded-lg border border-stone-300 text-base font-bold focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+          </div>
+          <div>
+            <span class="text-xs text-stone-500 block mb-1">對帳結果 (短少/溢收)</span>
+            <span id="reconcile-diff-result" class="text-lg font-bold text-stone-400">請輸入實收金額</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Toolbar -->
+      <div class="flex flex-wrap items-center justify-between gap-3 bg-white p-4 rounded-2xl shadow-sm border border-stone-200">
+        <div>
+          <h2 class="text-base font-bold text-stone-800">庫存總覽與數據報表</h2>
+          <p class="text-xs text-stone-500">檢視備貨量、銷售量與剩餘庫存，可匯出完整 CSV</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="exportCSV()" class="bg-stone-800 hover:bg-stone-900 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow transition flex items-center gap-2">
+            <i class="fa-solid fa-file-csv text-emerald-400 text-sm"></i> 匯出 CSV 完整報表
+          </button>
+          <button onclick="confirmResetSession()" class="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-medium px-3.5 py-2.5 rounded-xl transition flex items-center gap-1.5">
+            <i class="fa-solid fa-rotate-right"></i> 清空重置歸零
+          </button>
+        </div>
+      </div>
+
+      <!-- Item Inventory & Sales Summary Table -->
+      <div class="bg-white rounded-2xl shadow-sm border border-stone-200 overflow-hidden">
+        <div class="px-5 py-4 border-b border-stone-100 flex items-center justify-between">
+          <h3 class="font-bold text-stone-800 text-sm flex items-center gap-2">
+            <i class="fa-solid fa-clipboard-check text-emerald-600"></i> 各商品庫存與對帳明細
+          </h3>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm">
+            <thead class="bg-stone-50 text-stone-500 border-b border-stone-100 text-xs">
+              <tr>
+                <th class="px-5 py-3 font-semibold">商品名稱</th>
+                <th class="px-5 py-3 font-semibold">單價</th>
+                <th class="px-5 py-3 font-semibold">進貨/備貨量</th>
+                <th class="px-5 py-3 font-semibold">已售出數量</th>
+                <th class="px-5 py-3 font-semibold">理論剩餘庫存</th>
+                <th class="px-5 py-3 font-semibold text-right">銷售金額小計</th>
+              </tr>
+            </thead>
+            <tbody id="summary-table-body" class="divide-y divide-stone-100 text-stone-700">
+              <tr><td colspan="6" class="px-5 py-6 text-center text-stone-400 text-xs">尚無商品數據</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Unlimited Transaction Log -->
+      <div class="bg-white rounded-2xl shadow-sm border border-stone-200 overflow-hidden">
+        <div class="px-5 py-4 border-b border-stone-100 flex items-center justify-between">
+          <h3 class="font-bold text-stone-800 text-sm flex items-center gap-2">
+            <i class="fa-solid fa-clock-rotate-left text-amber-600"></i> 實時點數異動日誌 (無上限完整留存)
+          </h3>
+          <span id="log-count-badge" class="text-xs bg-stone-100 text-stone-600 px-2 py-0.5 rounded-full font-medium">0 筆紀錄</span>
+        </div>
+        <div class="max-h-96 overflow-y-auto divide-y divide-stone-100" id="transaction-log-list">
+          <div class="p-6 text-center text-stone-400 text-xs">暫無點數異動紀錄</div>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t border-stone-200 py-4 text-center text-xs text-stone-400">
+    <div class="max-w-5xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-2">
+      <p>市集銷售隨手記 &copy; 2026 - 雲端即時同步與盤點對帳系統</p>
+      <p class="flex items-center gap-1.5 text-stone-500">
+        <i class="fa-solid fa-cloud text-emerald-600"></i> 狀態: <span id="firebase-status">初始化中...</span>
+      </p>
+    </div>
+  </footer>
+
+  <!-- Modal for Editing Product Details & Stock -->
+  <div id="edit-modal" class="fixed inset-0 bg-stone-900/40 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-stone-100 space-y-4">
+      <div class="flex justify-between items-center border-b border-stone-100 pb-3">
+        <h3 class="font-bold text-stone-800">修改商品資訊與備貨庫存</h3>
+        <button onclick="closeEditModal()" class="text-stone-400 hover:text-stone-600">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+      <form id="edit-product-form" onsubmit="handleSaveEdit(event)" class="space-y-4">
+        <input type="hidden" id="edit-product-id">
+        <div>
+          <label class="block text-xs font-semibold text-stone-600 mb-1">商品名稱</label>
+          <input type="text" id="edit-product-name" required class="w-full px-3 py-2 border border-stone-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-stone-600 mb-1">單價 (NT$)</label>
+            <input type="number" id="edit-product-price" min="0" step="1" required class="w-full px-3 py-2 border border-stone-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-stone-600 mb-1">進貨/備貨總量</label>
+            <input type="number" id="edit-product-stock" min="0" step="1" required class="w-full px-3 py-2 border border-stone-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-stone-600 mb-1">已售出數量</label>
+          <input type="number" id="edit-product-count" min="0" step="1" required class="w-full px-3 py-2 border border-stone-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="closeEditModal()" class="px-4 py-2 bg-stone-100 text-stone-600 text-xs font-medium rounded-xl hover:bg-stone-200">取消</button>
+          <button type="submit" class="px-4 py-2 bg-emerald-600 text-white text-xs font-semibold rounded-xl hover:bg-emerald-700 shadow">儲存更新</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Custom Alert/Confirm Toast Notification Container -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm"></div>
+
+  <!-- Firebase Integration Script (v11 API) -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, collection, query, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // Application state
+    let products = [];
+    let transactions = [];
+    let db = null;
+    let auth = null;
+    let currentUser = null;
+    let isCloudSyncAvailable = false;
+
+    // Config setup
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'market-sales-tracker-app';
+    const firebaseConfig = typeof __firebase_config !== 'undefined' 
+      ? JSON.parse(__firebase_config) 
+      : {
+          apiKey: "demo-key",
+          authDomain: "demo.firebaseapp.com",
+          projectId: "demo-project",
+          storageBucket: "demo.appspot.com",
+          messagingSenderId: "123456789",
+          appId: "1:123456789:web:abcdef"
+        };
+
+    // Initialize Firebase
+    try {
+      const app = initializeApp(firebaseConfig);
+      db = getFirestore(app);
+      auth = getAuth(app);
+
+      const initAuth = async () => {
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+          await signInWithCustomToken(auth, __initial_auth_token);
+        } else {
+          await signInAnonymously(auth);
+        }
+      };
+
+      initAuth().catch(err => {
+        console.warn("Firebase Auth fallback to local mode:", err);
+        updateSyncStatus(false, "離線/單機備份模式");
+      });
+
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          currentUser = user;
+          isCloudSyncAvailable = true;
+          updateSyncStatus(true, "雲端實時同步中");
+          setupRealtimeListeners();
+        } else {
+          isCloudSyncAvailable = false;
+          updateSyncStatus(false, "單機離線紀錄模式");
+          loadLocalStorageData();
+        }
+      });
+    } catch (e) {
+      console.warn("Firebase Init Exception, using local storage:", e);
+      updateSyncStatus(false, "離線備份模式");
+      loadLocalStorageData();
+    }
+
+    // Set up Firestore collection realtime listeners
+    function setupRealtimeListeners() {
+      if (!db || !currentUser) return;
+
+      const productsColRef = collection(db, 'artifacts', appId, 'public', 'data', 'products');
+      const transactionsColRef = collection(db, 'artifacts', appId, 'public', 'data', 'transactions');
+
+      // 1. Realtime listener for products (Cloud sync across all devices)
+      onSnapshot(productsColRef, (snapshot) => {
+        const loadedProducts = [];
+        snapshot.forEach((doc) => {
+          loadedProducts.push({ id: doc.id, ...doc.data() });
+        });
+        
+        products = loadedProducts;
+        saveLocalStorageData();
+        renderUI();
+      }, (error) => {
+        console.error("Products subscription error:", error);
+        updateSyncStatus(false, "網路連線受限");
+      });
+
+      // 2. Realtime listener for UNLIMITED transaction logs
+      onSnapshot(transactionsColRef, (snapshot) => {
+        const loadedTx = [];
+        snapshot.forEach((doc) => {
+          loadedTx.push({ id: doc.id, ...doc.data() });
+        });
+        // Sort transactions by timestamp descending without 50-item limit
+        transactions = loadedTx.sort((a, b) => {
+          const timeA = a.timestamp?.seconds || a.localTime || 0;
+          const timeB = b.timestamp?.seconds || b.localTime || 0;
+          return timeB - timeA;
+        });
+        saveLocalStorageData();
+        renderTransactions();
+      }, (error) => {
+        console.error("Transactions subscription error:", error);
+      });
+    }
+
+    // LocalStorage Backup Handling
+    function loadLocalStorageData() {
+      try {
+        const cachedProd = localStorage.getItem('market_products');
+        const cachedTx = localStorage.getItem('market_tx');
+        if (cachedProd) products = JSON.parse(cachedProd);
+        if (cachedTx) transactions = JSON.parse(cachedTx);
+      } catch(e) {
+        console.error("Failed to load local cache", e);
+      }
+      renderUI();
+      renderTransactions();
+    }
+
+    function saveLocalStorageData() {
+      try {
+        localStorage.setItem('market_products', JSON.stringify(products));
+        localStorage.setItem('market_tx', JSON.stringify(transactions));
+      } catch(e) {
+        console.error("Failed to save local cache", e);
+      }
+    }
+
+    // Database CRUD wrappers
+    async function createProductInDb(name, price, stock = 0) {
+      if (isCloudSyncAvailable && db) {
+        try {
+          const productsColRef = collection(db, 'artifacts', appId, 'public', 'data', 'products');
+          await addDoc(productsColRef, {
+            name,
+            price: Number(price),
+            stock: Number(stock),
+            count: 0,
+            updatedAt: serverTimestamp()
+          });
+          showToast(`已成功新增品項: ${name}`, "success");
+        } catch (err) {
+          console.error("Failed adding product:", err);
+        }
+      } else {
+        const newProduct = { 
+          id: Date.now().toString(), 
+          name, 
+          price: Number(price), 
+          stock: Number(stock), 
+          count: 0 
+        };
+        products.push(newProduct);
+        saveLocalStorageData();
+        renderUI();
+        showToast(`已新增品項: ${name}`, "success");
+      }
+    }
+
+    async function updateProductQuantityInDb(productId, delta) {
+      const prod = products.find(p => p.id === productId);
+      if (!prod) return;
+
+      const prevCount = prod.count || 0;
+      const newCount = Math.max(0, prevCount + delta);
+      const actualDelta = newCount - prevCount;
+      if (actualDelta === 0 && delta < 0) return;
+
+      if (isCloudSyncAvailable && db) {
+        try {
+          const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'products', productId);
+          await setDoc(docRef, { count: newCount }, { merge: true });
+
+          // Add unlimited transaction log record
+          const txColRef = collection(db, 'artifacts', appId, 'public', 'data', 'transactions');
+          await addDoc(txColRef, {
+            productName: prod.name,
+            delta: actualDelta,
+            beforeCount: prevCount,
+            afterCount: newCount,
+            unitPrice: prod.price,
+            totalChange: actualDelta * prod.price,
+            timestamp: serverTimestamp(),
+            localTime: Date.now()
+          });
+        } catch (err) {
+          console.error("Error updating quantity:", err);
+        }
+      } else {
+        prod.count = newCount;
+        transactions.unshift({
+          id: Date.now().toString(),
+          productName: prod.name,
+          delta: actualDelta,
+          beforeCount: prevCount,
+          afterCount: newCount,
+          unitPrice: prod.price,
+          totalChange: actualDelta * prod.price,
+          localTime: Date.now()
+        });
+        saveLocalStorageData();
+        renderUI();
+        renderTransactions();
+      }
+    }
+
+    async function updateProductDetailsInDb(productId, name, price, stock, count) {
+      if (isCloudSyncAvailable && db) {
+        try {
+          const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'products', productId);
+          await setDoc(docRef, {
+            name: name,
+            price: Number(price),
+            stock: Number(stock),
+            count: Number(count),
+            updatedAt: serverTimestamp()
+          }, { merge: true });
+          showToast("商品及備貨資料已更新", "success");
+        } catch (err) {
+          console.error("Error saving edit:", err);
+        }
+      } else {
+        const prod = products.find(p => p.id === productId);
+        if (prod) {
+          prod.name = name;
+          prod.price = Number(price);
+          prod.stock = Number(stock);
+          prod.count = Number(count);
+        }
+        saveLocalStorageData();
+        renderUI();
+        showToast("商品及備貨資料已更新", "success");
+      }
+    }
+
+    async function deleteProductInDb(productId) {
+      const prod = products.find(p => p.id === productId);
+      if (!prod) return;
+
+      if (isCloudSyncAvailable && db) {
+        try {
+          const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'products', productId);
+          await deleteDoc(docRef);
+          showToast(`已刪除 ${prod.name}`, "info");
+        } catch (err) {
+          console.error("Error deleting product:", err);
+        }
+      } else {
+        products = products.filter(p => p.id !== productId);
+        saveLocalStorageData();
+        renderUI();
+        showToast(`已刪除 ${prod.name}`, "info");
+      }
+    }
+
+    async function resetAllDataInDb() {
+      if (isCloudSyncAvailable && db) {
+        try {
+          // 1. Reset product sales counts to 0
+          for (const prod of products) {
+            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'products', prod.id);
+            await setDoc(docRef, { count: 0 }, { merge: true });
+          }
+
+          // 2. Delete all real-time transaction history logs from Firestore
+          const txColRef = collection(db, 'artifacts', appId, 'public', 'data', 'transactions');
+          for (const tx of transactions) {
+            if (tx.id) {
+              const txDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'transactions', tx.id);
+              await deleteDoc(txDocRef);
+            }
+          }
+
+          showToast("已成功歸零所有銷售數量並清空異動日誌！", "info");
+        } catch (e) {
+          console.error("Failed resetting data:", e);
+        }
+      } else {
+        // Fallback for LocalStorage
+        products.forEach(p => p.count = 0);
+        transactions = [];
+        saveLocalStorageData();
+        renderUI();
+        renderTransactions();
+        showToast("已歸零銷售量與歷史紀錄", "info");
+      }
+    }
+
+    // UI Rendering Functions
+    function renderUI() {
+      const grid = document.getElementById('product-list');
+      const summaryTable = document.getElementById('summary-table-body');
+      
+      let grandTotal = 0;
+      let grandCount = 0;
+      let grandRemainingStock = 0;
+
+      if (!products || products.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full py-12 text-center text-stone-400 bg-white rounded-2xl border border-dashed border-stone-300">
+            <i class="fa-solid fa-box-open text-4xl mb-3 text-stone-300"></i>
+            <p class="font-medium text-stone-500">目前展售列表為空白</p>
+            <p class="text-xs text-stone-400 mt-1">請使用上方「新增展售商品品項與備貨量」表單建立新商品</p>
+          </div>
+        `;
+        summaryTable.innerHTML = `<tr><td colspan="6" class="px-5 py-6 text-center text-stone-400 text-xs">尚無商品數據，請先新增品項</td></tr>`;
+      } else {
+        let gridHtml = '';
+        let tableHtml = '';
+
+        products.forEach(prod => {
+          const count = prod.count || 0;
+          const price = prod.price || 0;
+          const stock = prod.stock || 0;
+          const remaining = stock - count;
+          const subtotal = count * price;
+
+          grandTotal += subtotal;
+          grandCount += count;
+          grandRemainingStock += remaining;
+
+          const remainingBadgeClass = remaining <= 0 
+            ? 'bg-rose-100 text-rose-800 border-rose-200' 
+            : remaining <= 5 
+              ? 'bg-amber-100 text-amber-800 border-amber-200' 
+              : 'bg-emerald-100 text-emerald-800 border-emerald-200';
+
+          // Render Grid Card for Sales Tab
+          gridHtml += `
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-stone-200 hover:shadow-md transition flex flex-col justify-between">
+              <div>
+                <div class="flex items-start justify-between">
+                  <div>
+                    <h3 class="font-bold text-lg text-stone-800 leading-tight">${escapeHtml(prod.name)}</h3>
+                    <div class="text-xs text-stone-500 mt-1">
+                      單價: <span class="font-bold text-emerald-700 text-sm">NT$ ${price}</span>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-1">
+                    <button onclick="openEditModal('${prod.id}')" title="編輯品項與備貨" class="text-stone-400 hover:text-stone-600 p-1.5 rounded-lg hover:bg-stone-100 text-xs transition">
+                      <i class="fa-solid fa-pen"></i>
+                    </button>
+                    <button onclick="confirmDeleteProduct('${prod.id}', '${escapeHtml(prod.name)}')" title="刪除品項" class="text-rose-400 hover:text-rose-600 p-1.5 rounded-lg hover:bg-rose-50 text-xs transition">
+                      <i class="fa-solid fa-trash"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Stock Info Badges -->
+                <div class="grid grid-cols-3 gap-2 mt-3 text-center text-xs">
+                  <div class="bg-stone-50 p-1.5 rounded-xl border border-stone-100">
+                    <span class="text-stone-400 block text-[10px]">進貨總量</span>
+                    <span class="font-bold text-stone-700 text-sm">${stock}</span>
+                  </div>
+                  <div class="bg-emerald-50 p-1.5 rounded-xl border border-emerald-100">
+                    <span class="text-emerald-600 block text-[10px]">已銷售量</span>
+                    <span class="font-extrabold text-emerald-800 text-sm">${count}</span>
+                  </div>
+                  <div class="p-1.5 rounded-xl border ${remainingBadgeClass}">
+                    <span class="block text-[10px] opacity-80">剩餘庫存</span>
+                    <span class="font-black text-sm">${remaining}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Controls Section -->
+              <div class="mt-4 pt-3 border-t border-stone-100 flex items-center justify-between">
+                <div>
+                  <span class="text-[11px] text-stone-400 block">銷售金額小計</span>
+                  <span class="text-lg font-black text-emerald-800">NT$ ${subtotal.toLocaleString()}</span>
+                </div>
+
+                <!-- Touch Friendly Large Quick Buttons -->
+                <div class="flex items-center bg-stone-100 p-1 rounded-xl gap-2">
+                  <button onclick="changeQty('${prod.id}', -1)" 
+                    class="w-12 h-12 bg-white hover:bg-rose-50 text-rose-600 font-bold rounded-xl shadow-sm border border-stone-200 active:scale-95 flex items-center justify-center text-xl transition">
+                    <i class="fa-solid fa-minus"></i>
+                  </button>
+                  
+                  <span class="w-8 text-center font-black text-xl text-stone-800">${count}</span>
+
+                  <button onclick="changeQty('${prod.id}', 1)" 
+                    class="w-12 h-12 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-md active:scale-95 flex items-center justify-center text-xl transition">
+                    <i class="fa-solid fa-plus"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          `;
+
+          // Render Table Row for History & Reconciliation Tab
+          tableHtml += `
+            <tr class="hover:bg-stone-50 text-xs">
+              <td class="px-5 py-3 font-bold text-stone-800">${escapeHtml(prod.name)}</td>
+              <td class="px-5 py-3">NT$ ${price}</td>
+              <td class="px-5 py-3 font-semibold text-stone-600">${stock} 件</td>
+              <td class="px-5 py-3 font-bold text-emerald-700">${count} 件</td>
+              <td class="px-5 py-3 font-bold ${remaining < 0 ? 'text-rose-600' : 'text-amber-700'}">${remaining} 件</td>
+              <td class="px-5 py-3 text-right font-black text-emerald-700">NT$ ${subtotal.toLocaleString()}</td>
+            </tr>
+          `;
         });
 
-        function loadCloudData() {
-            const spinner = document.getElementById('sync-spinner');
-            if (spinner) spinner.classList.add('animate-spin');
+        grid.innerHTML = gridHtml;
+        summaryTable.innerHTML = tableHtml;
+      }
 
-            fetch(GOOGLE_SCRIPT_URL)
-                .then(res => res.json())
-                .then(data => {
-                    cloudRecords = Array.isArray(data) ? data : [];
-                    updateDeptDropdown();
-                    filterData();
-                })
-                .catch(err => {
-                    console.error("Cloud fetch failed:", err);
-                    alert("無法連線至雲端資料庫，請檢查 Apps Script 網址是否正確。");
-                })
-                .finally(() => {
-                    if (spinner) spinner.classList.remove('animate-spin');
-                });
+      // Update Total Displays
+      document.getElementById('grand-total').innerText = `NT$ ${grandTotal.toLocaleString()}`;
+      document.getElementById('grand-count').innerText = grandCount;
+      document.getElementById('grand-remaining-stock').innerText = grandRemainingStock;
+      document.getElementById('reconcile-expected-total').innerText = `NT$ ${grandTotal.toLocaleString()}`;
+
+      // Update reconciliation if input value exists
+      calculateDifference();
+    }
+
+    // Render Transaction Log List (UNLIMITED)
+    function renderTransactions() {
+      const container = document.getElementById('transaction-log-list');
+      const badge = document.getElementById('log-count-badge');
+
+      if (!transactions || transactions.length === 0) {
+        container.innerHTML = `<div class="p-6 text-center text-stone-400 text-xs">暫無點數異動紀錄</div>`;
+        if (badge) badge.innerText = "0 筆紀錄";
+        return;
+      }
+
+      if (badge) badge.innerText = `${transactions.length} 筆完整紀錄`;
+
+      let html = '';
+      transactions.forEach(tx => {
+        let timeStr = '剛才';
+        if (tx.timestamp?.seconds) {
+          timeStr = new Date(tx.timestamp.seconds * 1000).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        } else if (tx.localTime) {
+          timeStr = new Date(tx.localTime).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
         }
+        
+        const isPlus = tx.delta > 0;
+        const badgeColor = isPlus ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800';
 
-        function updateDeptDropdown() {
-            const deptSelect = document.getElementById('filter-dept');
-            const currentSelected = deptSelect.value;
-            const departments = [...new Set(cloudRecords.map(item => item.dept).filter(Boolean))];
-            
-            deptSelect.innerHTML = `<option value="">總覽</option>`;
-            departments.forEach(dept => {
-                const opt = document.createElement('option');
-                opt.value = dept;
-                opt.textContent = dept;
-                deptSelect.appendChild(opt);
-            });
-            deptSelect.value = currentSelected;
-        }
+        html += `
+          <div class="px-5 py-3 flex items-center justify-between text-xs hover:bg-stone-50 transition">
+            <div class="flex items-center space-x-3">
+              <span class="px-2.5 py-1 rounded-lg font-black ${badgeColor}">
+                ${isPlus ? '+' + tx.delta : tx.delta}
+              </span>
+              <div>
+                <span class="font-bold text-stone-800">${escapeHtml(tx.productName)}</span>
+                <span class="text-[10px] text-stone-400 block">異動前: ${tx.beforeCount ?? '?'}件 &rarr; 異動後: ${tx.afterCount ?? '?'}件</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-4 text-stone-500">
+              <span class="text-stone-600">金額變動: <strong class="text-stone-900">NT$ ${tx.totalChange}</strong></span>
+              <span class="text-stone-400 font-mono text-[11px]">${timeStr}</span>
+            </div>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
 
-        function getFilteredRecords() {
-            const selectedDept = document.getElementById('filter-dept').value;
-            return cloudRecords.filter(item => !selectedDept || item.dept === selectedDept);
-        }
+    // Cash Difference Calculator
+    window.calculateDifference = function() {
+      const expectedText = document.getElementById('grand-total').innerText.replace(/[^\d]/g, '');
+      const expected = parseFloat(expectedText) || 0;
+      const actualInput = document.getElementById('actual-cash-input').value;
 
-        function filterData() {
-            const records = getFilteredRecords();
-            updateDashboard(records);
-        }
+      const resultSpan = document.getElementById('reconcile-diff-result');
 
-        function updateDashboard(records) {
-            const wasteRecords = records.filter(i => i.type === 'waste');
-            const bioRecords = records.filter(i => i.type === 'bio');
+      if (actualInput === '') {
+        resultSpan.className = "text-sm font-semibold text-stone-400";
+        resultSpan.innerText = "請輸入實收金額";
+        return;
+      }
 
-            const totalWaste = wasteRecords.reduce((acc, curr) => acc + (parseFloat(curr.amount) || 0), 0);
-            const carbonReduced = totalWaste * 2.1;
-            const vermicompost = totalWaste * 0.3;
-            const photoCount = records.filter(i => i.photo && i.photo.startsWith('http')).length;
+      const actual = parseFloat(actualInput);
+      const diff = actual - expected;
 
-            document.getElementById('kpi-total-waste').innerHTML = `${totalWaste.toFixed(1)} <span class="text-sm font-normal text-slate-500">kg</span>`;
-            document.getElementById('kpi-carbon-reduced').innerHTML = `${carbonReduced.toFixed(1)} <span class="text-sm font-normal text-slate-500">kg CO₂e</span>`;
-            document.getElementById('kpi-vermicompost').innerHTML = `${vermicompost.toFixed(1)} <span class="text-sm font-normal text-slate-500">kg</span>`;
-            document.getElementById('kpi-bio-logs').innerHTML = `${photoCount} <span class="text-sm font-normal text-slate-500">張存證</span>`;
+      if (diff === 0) {
+        resultSpan.className = "text-base font-black text-emerald-600";
+        resultSpan.innerHTML = `<i class="fa-solid fa-circle-check"></i> 帳目完美正確 (增減 $0)`;
+      } else if (diff > 0) {
+        resultSpan.className = "text-base font-black text-amber-600";
+        resultSpan.innerHTML = `<i class="fa-solid fa-circle-plus"></i> 溢收 (盤盈) NT$ ${diff.toLocaleString()}`;
+      } else {
+        resultSpan.className = "text-base font-black text-rose-600";
+        resultSpan.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> 短少 (盤虧) NT$ ${Math.abs(diff).toLocaleString()}`;
+      }
+    };
 
-            renderAllFourCharts(wasteRecords, bioRecords);
-            renderTable(records);
-        }
+    // Status Indicator Update
+    function updateSyncStatus(isOnline, text) {
+      const indicator = document.getElementById('sync-status-indicator');
+      const textSpan = document.getElementById('sync-status-text');
+      const footerStatus = document.getElementById('firebase-status');
 
-        // 同時渲染 4 大圖表的核心函數
-        function renderAllFourCharts(wasteRecords, bioRecords) {
-            // 銷毀舊實例避免懸浮殘影
-            if (cWasteTrend) cWasteTrend.destroy();
-            if (cWasteCat) cWasteCat.destroy();
-            if (cBioTrend) cBioTrend.destroy();
-            if (cBioCat) cBioCat.destroy();
+      if (isOnline) {
+        indicator.className = 'w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block animate-pulse';
+        textSpan.innerText = text || '雲端同步中';
+        footerStatus.innerText = '雲端即時同步與自動對帳模式';
+      } else {
+        indicator.className = 'w-2.5 h-2.5 rounded-full bg-amber-400 inline-block';
+        textSpan.innerText = text || '單機離線模式';
+        footerStatus.innerText = '單機離線儲存模式';
+      }
+    }
 
-            // -------------------------------------------------------------
-            // 圖 1: 廢棄物轉化趨勢分析 (長條圖)
-            // -------------------------------------------------------------
-            const wasteByDate = {};
-            wasteRecords.forEach(item => {
-                wasteByDate[item.date] = (wasteByDate[item.date] || 0) + (parseFloat(item.amount) || 0);
-            });
-            const wasteDates = Object.keys(wasteByDate).sort();
-            const wasteAmts = wasteDates.map(d => wasteByDate[d]);
+    // Global Action Handlers attached to Window
+    window.handleCreateProduct = function(event) {
+      event.preventDefault();
+      const nameInput = document.getElementById('new-product-name');
+      const priceInput = document.getElementById('new-product-price');
+      const stockInput = document.getElementById('new-product-stock');
 
-            cWasteTrend = new Chart(document.getElementById('chart-waste-trend').getContext('2d'), {
-                type: 'bar',
-                data: {
-                    labels: wasteDates,
-                    datasets: [{ label: '廢棄物 (kg)', data: wasteAmts, backgroundColor: '#10b981', borderRadius: 4 }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: { y: { beginAtZero: true, grid: { color: '#f8fafc' } }, x: { grid: { display: false } } }
-                }
-            });
+      const name = nameInput.value.trim();
+      const price = parseFloat(priceInput.value);
+      const stock = parseFloat(stockInput.value) || 0;
 
-            // -------------------------------------------------------------
-            // 圖 2: 資材種類佔比分析 (圓餅圖)
-            // -------------------------------------------------------------
-            const wasteCatMap = {};
-            wasteRecords.forEach(item => {
-                const cat = item.category || '未分類';
-                wasteCatMap[cat] = (wasteCatMap[cat] || 0) + (parseFloat(item.amount) || 0);
-            });
-            const wasteCatLabels = Object.keys(wasteCatMap);
-            const wasteCatData = Object.values(wasteCatMap);
+      if (!name || isNaN(price)) return;
 
-            cWasteCat = new Chart(document.getElementById('chart-waste-category').getContext('2d'), {
-                type: 'doughnut',
-                data: {
-                    labels: wasteCatLabels.length ? wasteCatLabels : ['尚無資料'],
-                    datasets: [{
-                        data: wasteCatData.length ? wasteCatData : [1],
-                        backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#ec4899', '#8b5cf6'],
-                        borderWidth: 2, borderColor: '#ffffff'
-                    }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } },
-                    cutout: '60%'
-                }
-            });
+      createProductInDb(name, price, stock);
 
-            // -------------------------------------------------------------
-            // 圖 3: 生物多樣性活躍度評分趨勢 (折線圖)
-            // -------------------------------------------------------------
-            const bioByDate = {};
-            bioRecords.forEach(item => {
-                bioByDate[item.date] = (bioByDate[item.date] || 0) + (parseInt(item.rating) || 0);
-            });
-            const bioDates = Object.keys(bioByDate).sort();
-            const bioRatings = bioDates.map(d => bioByDate[d]);
+      nameInput.value = '';
+      priceInput.value = '';
+      stockInput.value = '';
+    };
 
-            cBioTrend = new Chart(document.getElementById('chart-bio-trend').getContext('2d'), {
-                type: 'line',
-                data: {
-                    labels: bioDates,
-                    datasets: [{
-                        label: '活躍度評分', data: bioRatings,
-                        borderColor: '#6366f1', backgroundColor: 'rgba(99, 102, 241, 0.1)',
-                        fill: true, tension: 0.3, borderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: { y: { beginAtZero: true, grid: { color: '#f8fafc' } }, x: { grid: { display: false } } }
-                }
-            });
+    window.changeQty = function(productId, delta) {
+      updateProductQuantityInDb(productId, delta);
+    };
 
-            // -------------------------------------------------------------
-            // 圖 4: 生態觀察主題與物種佔比 (圓餅圖)
-            // -------------------------------------------------------------
-            const bioCatMap = {};
-            bioRecords.forEach(item => {
-                const topic = item.category || '一般觀察';
-                bioCatMap[topic] = (bioCatMap[topic] || 0) + 1;
-            });
-            const bioCatLabels = Object.keys(bioCatMap);
-            const bioCatData = Object.values(bioCatMap);
+    window.openEditModal = function(productId) {
+      const prod = products.find(p => p.id === productId);
+      if (!prod) return;
 
-            cBioCat = new Chart(document.getElementById('chart-bio-category').getContext('2d'), {
-                type: 'doughnut',
-                data: {
-                    labels: bioCatLabels.length ? bioCatLabels : ['尚無資料'],
-                    datasets: [{
-                        data: bioCatData.length ? bioCatData : [1],
-                        backgroundColor: ['#6366f1', '#10b981', '#f59e0b', '#ec4899', '#06b6d4'],
-                        borderWidth: 2, borderColor: '#ffffff'
-                    }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } },
-                    cutout: '60%'
-                }
-            });
-        }
+      document.getElementById('edit-product-id').value = prod.id;
+      document.getElementById('edit-product-name').value = prod.name;
+      document.getElementById('edit-product-price').value = prod.price;
+      document.getElementById('edit-product-stock').value = prod.stock || 0;
+      document.getElementById('edit-product-count').value = prod.count || 0;
 
-        function renderTable(records) {
-            const search = document.getElementById('table-search').value.toLowerCase();
-            const tbody = document.getElementById('data-table-body');
-            tbody.innerHTML = '';
+      document.getElementById('edit-modal').classList.remove('hidden');
+    };
 
-            const filtered = records.filter(item => 
-                (item.category && item.category.toLowerCase().includes(search)) ||
-                (item.dept && item.dept.toLowerCase().includes(search)) ||
-                (item.author && item.author.toLowerCase().includes(search)) ||
-                (item.notes && item.notes.toLowerCase().includes(search))
-            );
+    window.closeEditModal = function() {
+      document.getElementById('edit-modal').classList.add('hidden');
+    };
 
-            filtered.slice().reverse().forEach(item => {
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50 transition";
-                
-                const isWaste = item.type === 'waste';
-                const amountText = isWaste ? `${item.amount} kg` : `⭐ ${item.rating || '-'} 星`;
-                const carbonText = isWaste ? `${item.carbon} kg` : '-';
-                
-                const photoLink = item.photo ? 
-                    `<a href="${item.photo}" target="_blank" class="inline-flex items-center text-xs font-semibold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-md hover:bg-indigo-100 transition"><i data-lucide="external-link" class="w-3 h-3 mr-1"></i>檢視憑證</a>` : 
-                    `<span class="text-xs text-slate-300">無照片</span>`;
+    window.handleSaveEdit = function(event) {
+      event.preventDefault();
+      const id = document.getElementById('edit-product-id').value;
+      const name = document.getElementById('edit-product-name').value.trim();
+      const price = document.getElementById('edit-product-price').value;
+      const stock = document.getElementById('edit-product-stock').value;
+      const count = document.getElementById('edit-product-count').value;
 
-                tr.innerHTML = `
-                    <td class="p-4">${photoLink}</td>
-                    <td class="p-4 text-xs font-semibold text-slate-500">${item.date}</td>
-                    <td class="p-4"><span class="px-2.5 py-1 text-xs font-semibold rounded-full ${isWaste ? 'bg-emerald-100 text-emerald-700' : 'bg-indigo-100 text-indigo-700'}">${isWaste ? '減碳行動' : '生物觀察'}</span></td>
-                    <td class="p-4 font-medium">${item.category || '-'}</td>
-                    <td class="p-4 font-bold text-slate-800">${amountText}</td>
-                    <td class="p-4 text-teal-600 font-semibold text-xs">${carbonText}</td>
-                    <td class="p-4 text-xs text-slate-500">${item.dept || '-'}</td>
-                    <td class="p-4 text-xs font-medium text-slate-700">${item.author || '-'}</td>
-                    <td class="p-4 text-xs text-slate-400 max-w-xs truncate">${item.notes || '-'}</td>
-                `;
-                tbody.appendChild(tr);
-            });
-            lucide.createIcons();
-        }
+      if (!id || !name) return;
 
-        function compressImage(event) {
-            const file = event.target.files[0];
-            if (!file) {
-                compressedPhotoBase64 = '';
-                document.getElementById('photo-preview-container').classList.add('hidden');
-                return;
-            }
+      updateProductDetailsInDb(id, name, price, stock, count);
+      closeEditModal();
+    };
 
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const img = new Image();
-                img.onload = function() {
-                    const canvas = document.createElement('canvas');
-                    const MAX_WIDTH = 800;
-                    const MAX_HEIGHT = 800;
-                    let width = img.width;
-                    let height = img.height;
+    window.confirmDeleteProduct = function(productId, productName) {
+      showCustomConfirm(`確定要刪除商品「${productName}」嗎？`, () => {
+        deleteProductInDb(productId);
+      });
+    };
 
-                    if (width > height) {
-                        if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
-                    } else {
-                        if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
-                    }
+    window.confirmResetSession = function() {
+      showCustomConfirm("確定要重置歸零嗎？此動作將會「歸零所有銷售數量」並「完全清空點數異動日誌」。", () => {
+        resetAllDataInDb();
+      });
+    };
 
-                    canvas.width = width;
-                    canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
-                    
-                    compressedPhotoBase64 = canvas.toDataURL('image/jpeg', 0.65);
-                    document.getElementById('photo-preview').src = compressedPhotoBase64;
-                    document.getElementById('photo-preview-container').classList.remove('hidden');
-                };
-                img.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
-        }
+    window.exportCSV = function() {
+      if (!products || products.length === 0) {
+        showToast("尚無可供匯出的商品數據", "info");
+        return;
+      }
 
-        function openModal(type) {
-            document.getElementById('form-type').value = type;
-            document.getElementById('modal').classList.remove('hidden');
-            
-            if (type === 'waste') {
-                document.getElementById('modal-title').innerHTML = `<i data-lucide="cloud-upload" class="w-5 h-5 mr-2"></i> 填報廢棄物 / 資源循環`;
-                document.getElementById('field-category-waste').classList.remove('hidden');
-                document.getElementById('field-amount-waste').classList.remove('hidden');
-                document.getElementById('field-bio-details').classList.add('hidden');
-            } else {
-                document.getElementById('modal-title').innerHTML = `<i data-lucide="bug" class="w-5 h-5 mr-2"></i> 填報生物多樣性觀察`;
-                document.getElementById('field-category-waste').classList.add('hidden');
-                document.getElementById('field-amount-waste').classList.add('hidden');
-                document.getElementById('field-bio-details').classList.remove('hidden');
-            }
-            lucide.createIcons();
-        }
+      let csvContent = "\uFEFF"; // UTF-8 BOM for Chinese character compatibility
+      csvContent += "商品名稱,單價(NT$),進貨備貨量,已售出數量,理論剩餘庫存,銷售金額小計\n";
 
-        function closeModal() {
-            document.getElementById('modal').classList.add('hidden');
-            document.getElementById('record-form').reset();
-            compressedPhotoBase64 = '';
-            document.getElementById('photo-preview-container').classList.add('hidden');
-        }
+      let totalAmount = 0;
+      let totalQty = 0;
+      let totalStock = 0;
+      let totalRemaining = 0;
 
-        function handleCloudSubmit(event) {
-            event.preventDefault();
+      products.forEach(p => {
+        const count = p.count || 0;
+        const stock = p.stock || 0;
+        const price = p.price || 0;
+        const remaining = stock - count;
+        const subtotal = count * price;
 
-            if (!compressedPhotoBase64) {
-                alert("⚠️ 為了確保數據符合 GRI/TNFD 第三方稽核合規性，必須選擇並上傳現場照片憑證後才可提交！");
-                return;
-            }
+        totalAmount += subtotal;
+        totalQty += count;
+        totalStock += stock;
+        totalRemaining += remaining;
 
-            const btn = document.getElementById('submit-btn');
-            btn.disabled = true;
-            btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 mr-2 animate-spin inline"></i> 正在安全上傳至雲端...`;
-            lucide.createIcons();
+        csvContent += `"${p.name.replace(/"/g, '""')}",${price},${stock},${count},${remaining},${subtotal}\n`;
+      });
 
-            const type = document.getElementById('form-type').value;
-            const payload = {
-                id: Date.now(),
-                date: document.getElementById('form-date').value,
-                type: type,
-                dept: document.getElementById('form-dept').value,
-                author: document.getElementById('form-author').value,
-                notes: document.getElementById('form-notes').value,
-                photoBase64: compressedPhotoBase64
-            };
+      csvContent += `\n"總計彙整",,${totalStock},${totalQty},${totalRemaining},${totalAmount}\n`;
 
-            if (type === 'waste') {
-                payload.category = document.getElementById('form-category-waste').value;
-                payload.amount = parseFloat(document.getElementById('form-amount').value) || 0;
-            } else {
-                payload.category = document.getElementById('form-bio-title').value || '生態觀察';
-                payload.rating = parseInt(document.getElementById('form-worm-rating').value);
-            }
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      const dateStr = new Date().toISOString().slice(0, 10);
+      link.setAttribute("href", url);
+      link.setAttribute("download", `市集展售庫存盤點報表_${dateStr}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast("CSV 報表匯出成功！", "success");
+    };
 
-            fetch(GOOGLE_SCRIPT_URL, {
-                method: 'POST',
-                body: JSON.stringify(payload)
-            })
-            .then(res => res.json())
-            .then(res => {
-                if(res.status === "success") {
-                    alert('🎉 資料與現場憑證照片已成功寫入雲端！');
-                    closeModal();
-                    loadCloudData();
-                } else {
-                    alert('上傳失敗: ' + (res.message || '未知錯誤'));
-                }
-            })
-            .catch(err => {
-                console.error("Submission error:", err);
-                alert('網路連線異常，請確認 Apps Script 部署設定是否為「任何人」');
-            })
-            .finally(() => {
-                btn.disabled = false;
-                btn.innerHTML = `確認並上傳雲端`;
-            });
-        }
+    window.switchTab = function(tabName) {
+      const salesTab = document.getElementById('tab-sales');
+      const historyTab = document.getElementById('tab-history');
+      const salesBtn = document.getElementById('tab-btn-sales');
+      const historyBtn = document.getElementById('tab-btn-history');
 
-        function exportCSV() {
-            let csv = '\uFEFFID,日期,類型,細項類別,數量或評分,估算減碳(kgCO2e),記錄部門,填寫人,備註,Google Drive 憑證網址\n';
+      if (tabName === 'sales') {
+        salesTab.classList.remove('hidden');
+        historyTab.classList.add('hidden');
 
-            const records = getFilteredRecords();
-            records.forEach(item => {
-                const isWaste = item.type === 'waste';
-                csv += `"${item.id}","${item.date}","${isWaste ? '減碳行動' : '生物觀察'}","${item.category}","${isWaste ? item.amount : item.rating}","${item.carbon}","${item.dept||''}","${item.author||''}","${(item.notes||'').replace(/"/g, '""')}","${item.photo||''}"\n`;
-            });
+        salesBtn.className = "px-3.5 py-1.5 rounded-lg transition-all duration-200 bg-white text-emerald-900 shadow font-semibold";
+        historyBtn.className = "px-3.5 py-1.5 rounded-lg transition-all duration-200 text-emerald-100 hover:text-white";
+      } else {
+        salesTab.classList.add('hidden');
+        historyTab.classList.remove('hidden');
 
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = `ESG_FullOverview_Report_${new Date().toISOString().split('T')[0]}.csv`;
-            link.click();
-        }
-    </script>
+        historyBtn.className = "px-3.5 py-1.5 rounded-lg transition-all duration-200 bg-white text-emerald-900 shadow font-semibold";
+        salesBtn.className = "px-3.5 py-1.5 rounded-lg transition-all duration-200 text-emerald-100 hover:text-white";
+      }
+    };
+
+    // Helper functions
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/[&<>"']/g, function(m) {
+        return {
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          '"': '&quot;',
+          "'": '&#039;'
+        }[m];
+      });
+    }
+
+    function showToast(message, type = "info") {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      
+      let bgColor = "bg-stone-800 text-white";
+      if (type === "success") bgColor = "bg-emerald-700 text-white";
+      if (type === "error") bgColor = "bg-rose-700 text-white";
+
+      toast.className = `${bgColor} text-xs font-semibold px-4 py-3 rounded-xl shadow-lg flex items-center justify-between gap-3 transform transition-all duration-300 translate-y-2 opacity-0`;
+      toast.innerHTML = `
+        <span>${message}</span>
+        <button onclick="this.parentElement.remove()" class="text-white/80 hover:text-white">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      `;
+
+      container.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.classList.remove('translate-y-2', 'opacity-0');
+      }, 10);
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0');
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
+    function showCustomConfirm(message, onConfirm) {
+      const modal = document.createElement('div');
+      modal.className = "fixed inset-0 bg-stone-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4";
+      modal.innerHTML = `
+        <div class="bg-white rounded-2xl max-w-xs w-full p-5 shadow-xl border border-stone-100 text-center space-y-4">
+          <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto text-xl">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+          </div>
+          <p class="text-sm font-bold text-stone-800">${message}</p>
+          <div class="flex items-center justify-center gap-2 pt-2">
+            <button id="cancel-btn" class="px-4 py-2 bg-stone-100 text-stone-600 text-xs font-medium rounded-xl hover:bg-stone-200">取消</button>
+            <button id="confirm-btn" class="px-4 py-2 bg-rose-600 text-white text-xs font-semibold rounded-xl hover:bg-rose-700 shadow">確定執行</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+
+      modal.querySelector('#cancel-btn').onclick = () => modal.remove();
+      modal.querySelector('#confirm-btn').onclick = () => {
+        onConfirm();
+        modal.remove();
+      };
+    }
+  </script>
 </body>
 </html>
