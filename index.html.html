@@ -293,7 +293,49 @@
 
   <!-- Firebase Integration Script (v11 API) -->
   <script type="module">
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzhtpygnZZIxIp0FimUVaBtwAGBHsSz2Uq6Afl_UtXfd_yvafInjznYIR3RjdOsfJ-O/exec";
+    const GOOGLE_SCRIPT_URL = "您的_Google_Apps_Script_部署網址_exec";
+
+// 1. 同步新增商品至雲端
+async function syncAddProductToCloud(product) {
+  try {
+    await fetch(GOOGLE_SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'addProduct', ...product })
+    });
+  } catch (err) {
+    console.error("雲端新增失敗:", err);
+  }
+}
+
+// 2. 同步異動數量與日誌至雲端
+async function syncUpdateQtyToCloud(txData) {
+  try {
+    await fetch(GOOGLE_SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'updateQuantity', ...txData })
+    });
+  } catch (err) {
+    console.error("雲端更新數量失敗:", err);
+  }
+}
+
+// 3. 同步重置歸零至雲端
+async function syncResetAllToCloud() {
+  try {
+    await fetch(GOOGLE_SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'resetAll' })
+    });
+  } catch (err) {
+    console.error("雲端重置失敗:", err);
+  }
+}
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, collection, query, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
