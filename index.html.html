@@ -52,21 +52,27 @@
         <div>
           <h1 class="font-bold text-lg leading-tight">市集銷售隨手記</h1>
           <p class="text-xs text-emerald-200 flex items-center gap-1.5">
-            <span id="sync-status-indicator" class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span>
-            <span id="sync-status-text">連線初始化中...</span>
+            <span id="sync-status-indicator" class="w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block animate-pulse"></span>
+            <span id="sync-status-text">Google 試算表雲端同步中</span>
           </p>
         </div>
       </div>
 
-      <!-- Navigation Tabs -->
-      <nav class="flex bg-emerald-900/60 p-1 rounded-xl text-sm font-medium">
-        <button id="tab-btn-sales" onclick="switchTab('sales')" class="px-3.5 py-1.5 rounded-lg transition-all duration-200 bg-white text-emerald-900 shadow font-semibold">
-          <i class="fa-solid fa-calculator mr-1"></i>銷售主頁
+      <!-- Navigation Tabs & Manual Sync Button -->
+      <div class="flex items-center space-x-2">
+        <button onclick="loadCloudData()" class="bg-emerald-700 hover:bg-emerald-600 text-white px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition border border-emerald-600/50">
+          <i id="sync-icon" class="fa-solid fa-rotate"></i>
+          <span class="hidden sm:inline">同步雲端</span>
         </button>
-        <button id="tab-btn-history" onclick="switchTab('history')" class="px-3.5 py-1.5 rounded-lg transition-all duration-200 text-emerald-100 hover:text-white">
-          <i class="fa-solid fa-chart-line mr-1"></i>盤點與統計
-        </button>
-      </nav>
+        <nav class="flex bg-emerald-900/60 p-1 rounded-xl text-sm font-medium">
+          <button id="tab-btn-sales" onclick="switchTab('sales')" class="px-3.5 py-1.5 rounded-lg transition-all duration-200 bg-white text-emerald-900 shadow font-semibold">
+            <i class="fa-solid fa-calculator mr-1"></i>銷售主頁
+          </button>
+          <button id="tab-btn-history" onclick="switchTab('history')" class="px-3.5 py-1.5 rounded-lg transition-all duration-200 text-emerald-100 hover:text-white">
+            <i class="fa-solid fa-chart-line mr-1"></i>盤點與統計
+          </button>
+        </nav>
+      </div>
     </div>
   </header>
 
@@ -114,7 +120,7 @@
               class="w-full px-3 py-2.5 rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm">
           </div>
           <div class="sm:col-span-2">
-            <button type="submit" class="w-full h-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-4 rounded-xl shadow transition text-sm flex items-center justify-center gap-1">
+            <button type="submit" id="add-btn" class="w-full h-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-4 rounded-xl shadow transition text-sm flex items-center justify-center gap-1">
               <i class="fa-solid fa-plus"></i> 加入
             </button>
           </div>
@@ -124,15 +130,15 @@
       <div>
         <div class="flex items-center justify-between mb-3">
           <h2 class="text-base font-bold text-stone-800 flex items-center gap-2">
-            <i class="fa-solid fa-boxes-stacked text-amber-600"></i> 目前展售商品列表 (多裝置實時同步)
+            <i class="fa-solid fa-boxes-stacked text-amber-600"></i> 目前展售商品列表 (Google 雲端試算表同步)
           </h2>
-          <span class="text-xs text-stone-500">點擊 ＋ / － 按鈕所有裝置將同步更新</span>
+          <span class="text-xs text-stone-500">點擊 ＋ / － 按鈕寫入雲端</span>
         </div>
 
         <div id="product-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div class="col-span-full py-12 text-center text-stone-400 bg-white rounded-2xl border border-dashed border-stone-300">
             <i class="fa-solid fa-spinner fa-spin text-3xl mb-3 text-emerald-600"></i>
-            <p class="font-medium text-stone-500">正在從雲端同步載入資料...</p>
+            <p class="font-medium text-stone-500">正在從 Google 雲端試算表同步資料...</p>
           </div>
         </div>
       </div>
@@ -220,9 +226,9 @@
   <!-- Footer -->
   <footer class="bg-white border-t border-stone-200 py-4 text-center text-xs text-stone-400">
     <div class="max-w-5xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-2">
-      <p>市集銷售隨手記 &copy; 2026 - 跨裝置雲端實時同步系統</p>
+      <p>市集銷售隨手記 &copy; 2026 - Google 試算表雲端同步系統</p>
       <p class="flex items-center gap-1.5 text-stone-500">
-        <i class="fa-solid fa-cloud text-emerald-600"></i> 狀態: <span id="firebase-status">初始化中...</span>
+        <i class="fa-solid fa-cloud text-emerald-600"></i> 狀態: <span id="sync-status">Google Sheets 連線成功</span>
       </p>
     </div>
   </footer>
@@ -258,7 +264,7 @@
         </div>
         <div class="flex justify-end gap-2 pt-2">
           <button type="button" onclick="closeEditModal()" class="px-4 py-2 bg-stone-100 text-stone-600 text-xs font-medium rounded-xl hover:bg-stone-200">取消</button>
-          <button type="submit" class="px-4 py-2 bg-emerald-600 text-white text-xs font-semibold rounded-xl hover:bg-emerald-700 shadow">儲存更新</button>
+          <button type="submit" id="save-edit-btn" class="px-4 py-2 bg-emerald-600 text-white text-xs font-semibold rounded-xl hover:bg-emerald-700 shadow">儲存更新</button>
         </div>
       </form>
     </div>
@@ -266,132 +272,47 @@
 
   <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm"></div>
 
-  <!-- Main Firebase & Google Sheets Sync Script -->
-  <script type="module">
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbywgjmTfp0V3bknHKOPXSp60aLUcgABviBm1WBqiIbmuPhkg0uxgTdpniMmuMTsc20x/exec";
-
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-    async function syncAddProductToCloud(product) {
-      if (!GOOGLE_SCRIPT_URL) return;
-      try {
-        await fetch(GOOGLE_SCRIPT_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'addProduct', ...product })
-        });
-      } catch (err) { console.error("GAS sync error:", err); }
-    }
-
-    async function syncUpdateQtyToCloud(txData) {
-      if (!GOOGLE_SCRIPT_URL) return;
-      try {
-        await fetch(GOOGLE_SCRIPT_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'updateQuantity', ...txData })
-        });
-      } catch (err) { console.error("GAS sync error:", err); }
-    }
-
-    async function syncResetAllToCloud() {
-      if (!GOOGLE_SCRIPT_URL) return;
-      try {
-        await fetch(GOOGLE_SCRIPT_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'resetAll' })
-        });
-      } catch (err) { console.error("GAS sync error:", err); }
-    }
+  <!-- Main Pure Google Apps Script Sync Script -->
+  <script>
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzA4xOeQsdW0_iG2cgS3sRHYEwV3yBDVkT2zG9ejy8HR3xmW-Abh-sIwDhVK6QyQoER/exec";
 
     let products = [];
     let transactions = [];
-    let db = null;
-    let auth = null;
-    let currentUser = null;
-    let isCloudSyncAvailable = false;
 
-    // 固定共用頻道識別碼，確保跨裝置連結同一雲端資料庫
-    const appId = 'market-sales-tracker-shared-store-v1';
-    const firebaseConfig = typeof __firebase_config !== 'undefined' 
-      ? JSON.parse(__firebase_config) 
-      : {
-          apiKey: "demo-key",
-          authDomain: "demo.firebaseapp.com",
-          projectId: "demo-project",
-          storageBucket: "demo.appspot.com",
-          messagingSenderId: "123456789",
-          appId: "1:123456789:web:abcdef"
-        };
+    // 頁面初始化載入雲端資料
+    window.onload = function() {
+      loadCloudData();
+    };
 
-    try {
-      const app = initializeApp(firebaseConfig);
-      db = getFirestore(app);
-      auth = getAuth(app);
+    // 發送 GET 請求從 GAS 讀取試算表中所有商品與異動紀錄
+    function loadCloudData() {
+      const syncIcon = document.getElementById('sync-icon');
+      if (syncIcon) syncIcon.classList.add('fa-spin');
+      
+      updateSyncStatus(true, "正在從雲端載入資料...");
 
-      const initAuth = async () => {
-        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-          await signInWithCustomToken(auth, __initial_auth_token);
-        } else {
-          await signInAnonymously(auth);
-        }
-      };
-
-      initAuth().catch(err => { console.warn("Auth fallback", err); });
-
-      onAuthStateChanged(auth, (user) => {
-        if (user) {
-          currentUser = user;
-          isCloudSyncAvailable = true;
-          updateSyncStatus(true, "跨裝置雲端實時同步中");
-          setupRealtimeListeners();
-        } else {
-          isCloudSyncAvailable = false;
-          updateSyncStatus(false, "單機離線模式");
+      fetch(GOOGLE_SCRIPT_URL)
+        .then(res => res.json())
+        .then(data => {
+          if (data && Array.isArray(data.products)) {
+            products = data.products;
+          }
+          if (data && Array.isArray(data.transactions)) {
+            transactions = data.transactions;
+          }
+          saveLocalStorageData();
+          renderUI();
+          renderTransactions();
+          updateSyncStatus(true, "Google 試算表同步成功");
+        })
+        .catch(err => {
+          console.error("雲端讀取失敗，載入本機快取:", err);
           loadLocalStorageData();
-        }
-      });
-    } catch (e) {
-      console.warn("Firebase Init Exception", e);
-      updateSyncStatus(false, "離線儲存模式");
-      loadLocalStorageData();
-    }
-
-    function setupRealtimeListeners() {
-      if (!db || !currentUser) return;
-
-      const productsColRef = collection(db, 'artifacts', appId, 'public', 'data', 'products');
-      const transactionsColRef = collection(db, 'artifacts', appId, 'public', 'data', 'transactions');
-
-      onSnapshot(productsColRef, (snapshot) => {
-        const loadedProducts = [];
-        snapshot.forEach((doc) => {
-          loadedProducts.push({ id: doc.id, ...doc.data() });
+          updateSyncStatus(false, "網路連線異常，讀取本機舊資料");
+        })
+        .finally(() => {
+          if (syncIcon) syncIcon.classList.remove('fa-spin');
         });
-        products = loadedProducts;
-        saveLocalStorageData();
-        renderUI();
-      }, (error) => { console.error("Products sync error:", error); });
-
-      onSnapshot(transactionsColRef, (snapshot) => {
-        const loadedTx = [];
-        snapshot.forEach((doc) => {
-          loadedTx.push({ id: doc.id, ...doc.data() });
-        });
-        transactions = loadedTx.sort((a, b) => {
-          const timeA = a.timestamp?.seconds || a.localTime || 0;
-          const timeB = b.timestamp?.seconds || b.localTime || 0;
-          return timeB - timeA;
-        });
-        saveLocalStorageData();
-        renderTransactions();
-      }, (error) => { console.error("Transactions sync error:", error); });
     }
 
     function loadLocalStorageData() {
@@ -412,31 +333,60 @@
       } catch(e) {}
     }
 
-    async function createProductInDb(name, price, stock = 0) {
-      const generatedId = Date.now().toString();
-      syncAddProductToCloud({ id: generatedId, name, price: Number(price), stock: Number(stock) });
+    // 發送 POST 請求新增商品
+    async function handleCreateProduct(event) {
+      event.preventDefault();
+      const nameInput = document.getElementById('new-product-name');
+      const priceInput = document.getElementById('new-product-price');
+      const stockInput = document.getElementById('new-product-stock');
+      const addBtn = document.getElementById('add-btn');
 
-      if (isCloudSyncAvailable && db) {
-        try {
-          const productsColRef = collection(db, 'artifacts', appId, 'public', 'data', 'products');
-          await addDoc(productsColRef, {
-            name,
-            price: Number(price),
-            stock: Number(stock),
-            count: 0,
-            updatedAt: serverTimestamp()
-          });
-          showToast(`已成功新增品項: ${name}`, "success");
-        } catch (err) { console.error(err); }
-      } else {
-        products.push({ id: generatedId, name, price: Number(price), stock: Number(stock), count: 0 });
+      const name = nameInput.value.trim();
+      const price = parseFloat(priceInput.value);
+      const stock = parseFloat(stockInput.value) || 0;
+
+      if (!name || isNaN(price)) return;
+
+      addBtn.disabled = true;
+      addBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 新增中';
+
+      const newId = Date.now().toString();
+      const payload = {
+        action: 'addProduct',
+        id: newId,
+        name: name,
+        price: price,
+        stock: stock
+      };
+
+      try {
+        await fetch(GOOGLE_SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        // 樂觀更新前端資料
+        products.push({ id: newId, name: name, price: price, stock: stock, count: 0 });
         saveLocalStorageData();
         renderUI();
-        showToast(`已新增品項: ${name}`, "success");
+        showToast(`已新增商品: ${name}`, "success");
+
+        nameInput.value = '';
+        priceInput.value = '';
+        stockInput.value = '';
+        setTimeout(loadCloudData, 1000);
+      } catch (err) {
+        showToast("新增商品同步雲端失敗", "error");
+      } finally {
+        addBtn.disabled = false;
+        addBtn.innerHTML = '<i class="fa-solid fa-plus"></i> 加入';
       }
     }
 
-    async function updateProductQuantityInDb(productId, delta) {
+    // 發送 POST 請求更新商品數量 (＋ / －)
+    async function changeQty(productId, delta) {
       const prod = products.find(p => p.id === productId);
       if (!prod) return;
 
@@ -445,120 +395,140 @@
       const actualDelta = newCount - prevCount;
       if (actualDelta === 0 && delta < 0) return;
 
-      syncUpdateQtyToCloud({
+      // 樂觀更新 UI
+      prod.count = newCount;
+      transactions.unshift({
+        id: Date.now().toString(),
+        productName: prod.name,
+        delta: actualDelta,
+        beforeCount: prevCount,
+        afterCount: newCount,
+        unitPrice: prod.price,
+        totalChange: actualDelta * prod.price,
+        localTime: Date.now()
+      });
+      saveLocalStorageData();
+      renderUI();
+      renderTransactions();
+
+      const payload = {
+        action: 'updateQuantity',
         productId: prod.id,
         productName: prod.name,
         delta: actualDelta,
         unitPrice: prod.price,
         totalChange: actualDelta * prod.price,
         afterCount: newCount
-      });
+      };
 
-      if (isCloudSyncAvailable && db) {
-        try {
-          const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'products', productId);
-          await setDoc(docRef, { count: newCount }, { merge: true });
-
-          const txColRef = collection(db, 'artifacts', appId, 'public', 'data', 'transactions');
-          await addDoc(txColRef, {
-            productName: prod.name,
-            delta: actualDelta,
-            beforeCount: prevCount,
-            afterCount: newCount,
-            unitPrice: prod.price,
-            totalChange: actualDelta * prod.price,
-            timestamp: serverTimestamp(),
-            localTime: Date.now()
-          });
-        } catch (err) { console.error(err); }
-      } else {
-        prod.count = newCount;
-        transactions.unshift({
-          id: Date.now().toString(),
-          productName: prod.name,
-          delta: actualDelta,
-          beforeCount: prevCount,
-          afterCount: newCount,
-          unitPrice: prod.price,
-          totalChange: actualDelta * prod.price,
-          localTime: Date.now()
+      try {
+        await fetch(GOOGLE_SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
         });
-        saveLocalStorageData();
-        renderUI();
-        renderTransactions();
+      } catch (err) {
+        console.error("數量同步至雲端時出錯:", err);
       }
     }
 
-    async function updateProductDetailsInDb(productId, name, price, stock, count) {
-      if (isCloudSyncAvailable && db) {
-        try {
-          const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'products', productId);
-          await setDoc(docRef, {
-            name: name,
-            price: Number(price),
-            stock: Number(stock),
-            count: Number(count),
-            updatedAt: serverTimestamp()
-          }, { merge: true });
-          showToast("商品資料已更新", "success");
-        } catch (err) { console.error(err); }
-      } else {
-        const prod = products.find(p => p.id === productId);
-        if (prod) {
-          prod.name = name;
-          prod.price = Number(price);
-          prod.stock = Number(stock);
-          prod.count = Number(count);
-        }
-        saveLocalStorageData();
-        renderUI();
-        showToast("商品資料已更新", "success");
+    // 發送 POST 請求完整修改商品細節
+    async function handleSaveEdit(event) {
+      event.preventDefault();
+      const id = document.getElementById('edit-product-id').value;
+      const name = document.getElementById('edit-product-name').value.trim();
+      const price = parseFloat(document.getElementById('edit-product-price').value);
+      const stock = parseFloat(document.getElementById('edit-product-stock').value);
+      const count = parseFloat(document.getElementById('edit-product-count').value);
+      const saveBtn = document.getElementById('save-edit-btn');
+
+      if (!id || !name) return;
+
+      saveBtn.disabled = true;
+      saveBtn.innerText = "儲存中...";
+
+      const prod = products.find(p => p.id === id);
+      if (prod) {
+        prod.name = name;
+        prod.price = price;
+        prod.stock = stock;
+        prod.count = count;
+      }
+      saveLocalStorageData();
+      renderUI();
+
+      const payload = {
+        action: 'updateProduct',
+        id: id,
+        name: name,
+        price: price,
+        stock: stock,
+        count: count
+      };
+
+      try {
+        await fetch(GOOGLE_SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        showToast("商品資訊已同步更新", "success");
+        closeEditModal();
+        setTimeout(loadCloudData, 1000);
+      } catch (err) {
+        showToast("商品更新連線失敗", "error");
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.innerText = "儲存更新";
       }
     }
 
-    async function deleteProductInDb(productId) {
-      const prod = products.find(p => p.id === productId);
-      if (!prod) return;
-
-      if (isCloudSyncAvailable && db) {
-        try {
-          const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'products', productId);
-          await deleteDoc(docRef);
-          showToast(`已刪除 ${prod.name}`, "info");
-        } catch (err) { console.error(err); }
-      } else {
+    // 發送 POST 請求刪除商品
+    async function confirmDeleteProduct(productId, productName) {
+      showCustomConfirm(`確定要刪除商品「${productName}」嗎？`, async () => {
         products = products.filter(p => p.id !== productId);
         saveLocalStorageData();
         renderUI();
-        showToast(`已刪除 ${prod.name}`, "info");
-      }
+
+        try {
+          await fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'deleteProduct', id: productId })
+          });
+          showToast(`已刪除 ${productName}`, "info");
+          setTimeout(loadCloudData, 1000);
+        } catch(e) {
+          showToast("刪除失敗", "error");
+        }
+      });
     }
 
-    async function resetAllDataInDb() {
-      syncResetAllToCloud();
-
-      if (isCloudSyncAvailable && db) {
-        try {
-          for (const prod of products) {
-            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'products', prod.id);
-            await setDoc(docRef, { count: 0 }, { merge: true });
-          }
-          for (const tx of transactions) {
-            if (tx.id) {
-              const txDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'transactions', tx.id);
-              await deleteDoc(txDocRef);
-            }
-          }
-          showToast("已成功歸零所有銷售數量並清空異動日誌！", "info");
-        } catch (e) { console.error(e); }
-      } else {
+    // 發送 POST 請求重置歸零
+    async function confirmResetSession() {
+      showCustomConfirm("確定要重置歸零嗎？此動作將會「歸零所有銷售數量」並「完全清空點數異動日誌」。", async () => {
         products.forEach(p => p.count = 0);
         transactions = [];
         saveLocalStorageData();
         renderUI();
         renderTransactions();
-        showToast("已歸零", "info");
-      }
+
+        try {
+          await fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'resetAll' })
+          });
+          showToast("已成功歸零所有銷售數量並清空異動日誌！", "info");
+          setTimeout(loadCloudData, 1000);
+        } catch(e) {
+          showToast("重置失敗", "error");
+        }
+      });
     }
 
     function renderUI() {
@@ -573,8 +543,8 @@
         grid.innerHTML = `
           <div class="col-span-full py-12 text-center text-stone-400 bg-white rounded-2xl border border-dashed border-stone-300">
             <i class="fa-solid fa-box-open text-4xl mb-3 text-stone-300"></i>
-            <p class="font-medium text-stone-500">目前展售列表為空白（所有裝置連線同步中）</p>
-            <p class="text-xs text-stone-400 mt-1">請使用上方表單新增品項，任一裝置新增後全體自動同步</p>
+            <p class="font-medium text-stone-500">目前展售列表為空白（雲端試算表連線中）</p>
+            <p class="text-xs text-stone-400 mt-1">請使用上方表單新增品項，多裝置均可共享數據</p>
           </div>
         `;
         summaryTable.innerHTML = `<tr><td colspan="6" class="px-5 py-6 text-center text-stone-400 text-xs">尚無商品數據</td></tr>`;
@@ -599,10 +569,10 @@
               ? 'bg-amber-100 text-amber-800 border-amber-200' 
               : 'bg-emerald-100 text-emerald-800 border-emerald-200';
 
-          // 新版 UI 結構：第一行標題與編輯按鈕，第二行「小計」與「加減按鈕」緊鄰排列，第三行庫存數據
+          // 排版：小計與加減按鈕緊鄰排列於商品卡片中央
           gridHtml += `
             <div class="bg-white rounded-2xl p-4 shadow-sm border border-stone-200 hover:shadow-md transition flex flex-col justify-between space-y-3">
-              <!-- 1. 商品名稱、單價與編輯刪除按鈕 -->
+              <!-- 第一行：商品名稱、單價與編輯/刪除按鈕 -->
               <div class="flex items-start justify-between border-b border-stone-100 pb-2">
                 <div>
                   <h3 class="font-bold text-lg text-stone-800 leading-tight">${escapeHtml(prod.name)}</h3>
@@ -620,7 +590,7 @@
                 </div>
               </div>
 
-              <!-- 2. 小計與數量增減按鈕緊鄰排列於中央核心操作區 -->
+              <!-- 第二行：銷售金額小計與數量增減按鈕 (＋ / －) 緊鄰排列 -->
               <div class="flex items-center justify-between gap-2 bg-stone-50/80 p-2 rounded-xl border border-stone-100">
                 <div>
                   <span class="text-[10px] text-stone-400 block font-medium">銷售金額小計</span>
@@ -642,7 +612,7 @@
                 </div>
               </div>
 
-              <!-- 3. 進貨量、已售量與剩餘庫存資訊 -->
+              <!-- 第三行：進貨量、已售量與剩餘庫存數據 -->
               <div class="grid grid-cols-3 gap-2 text-center text-xs pt-1">
                 <div class="bg-stone-50 p-1.5 rounded-xl border border-stone-100">
                   <span class="text-stone-400 block text-[10px]">進貨總量</span>
@@ -699,8 +669,8 @@
       let html = '';
       transactions.forEach(tx => {
         let timeStr = '剛才';
-        if (tx.timestamp?.seconds) {
-          timeStr = new Date(tx.timestamp.seconds * 1000).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        if (tx.timestamp) {
+          timeStr = new Date(tx.timestamp).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
         } else if (tx.localTime) {
           timeStr = new Date(tx.localTime).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
         }
@@ -760,41 +730,18 @@
     function updateSyncStatus(isOnline, text) {
       const indicator = document.getElementById('sync-status-indicator');
       const textSpan = document.getElementById('sync-status-text');
-      const footerStatus = document.getElementById('firebase-status');
+      const footerStatus = document.getElementById('sync-status');
 
       if (isOnline) {
         indicator.className = 'w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block animate-pulse';
-        textSpan.innerText = text || '多裝置實時同步中';
-        footerStatus.innerText = '雲端雙向實時同步中';
+        textSpan.innerText = text || 'Google 試算表雲端同步中';
+        footerStatus.innerText = 'Google 試算表雙向同步成功';
       } else {
         indicator.className = 'w-2.5 h-2.5 rounded-full bg-amber-400 inline-block';
-        textSpan.innerText = text || '單機離線模式';
-        footerStatus.innerText = '單機離線儲存模式';
+        textSpan.innerText = text || '離線模式';
+        footerStatus.innerText = '單機離線快取';
       }
     }
-
-    window.handleCreateProduct = function(event) {
-      event.preventDefault();
-      const nameInput = document.getElementById('new-product-name');
-      const priceInput = document.getElementById('new-product-price');
-      const stockInput = document.getElementById('new-product-stock');
-
-      const name = nameInput.value.trim();
-      const price = parseFloat(priceInput.value);
-      const stock = parseFloat(stockInput.value) || 0;
-
-      if (!name || isNaN(price)) return;
-
-      createProductInDb(name, price, stock);
-
-      nameInput.value = '';
-      priceInput.value = '';
-      stockInput.value = '';
-    };
-
-    window.changeQty = function(productId, delta) {
-      updateProductQuantityInDb(productId, delta);
-    };
 
     window.openEditModal = function(productId) {
       const prod = products.find(p => p.id === productId);
@@ -811,32 +758,6 @@
 
     window.closeEditModal = function() {
       document.getElementById('edit-modal').classList.add('hidden');
-    };
-
-    window.handleSaveEdit = function(event) {
-      event.preventDefault();
-      const id = document.getElementById('edit-product-id').value;
-      const name = document.getElementById('edit-product-name').value.trim();
-      const price = document.getElementById('edit-product-price').value;
-      const stock = document.getElementById('edit-product-stock').value;
-      const count = document.getElementById('edit-product-count').value;
-
-      if (!id || !name) return;
-
-      updateProductDetailsInDb(id, name, price, stock, count);
-      closeEditModal();
-    };
-
-    window.confirmDeleteProduct = function(productId, productName) {
-      showCustomConfirm(`確定要刪除商品「${productName}」嗎？`, () => {
-        deleteProductInDb(productId);
-      });
-    };
-
-    window.confirmResetSession = function() {
-      showCustomConfirm("確定要重置歸零嗎？此動作將會「歸零所有銷售數量」並「完全清空點數異動日誌」。", () => {
-        resetAllDataInDb();
-      });
     };
 
     window.exportCSV = function() {
