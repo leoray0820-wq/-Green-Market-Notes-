@@ -464,6 +464,11 @@ async function syncResetAllToCloud() {
 
     // Database CRUD wrappers
     async function createProductInDb(name, price, stock = 0) {
+      const generatedId = Date.now().toString();
+      
+      // 同步至 Google 試算表
+      syncAddProductToCloud({ id: generatedId, name, price: Number(price), stock: Number(stock) });
+
       if (isCloudSyncAvailable && db) {
         try {
           const productsColRef = collection(db, 'artifacts', appId, 'public', 'data', 'products');
@@ -479,13 +484,7 @@ async function syncResetAllToCloud() {
           console.error("Failed adding product:", err);
         }
       } else {
-        const newProduct = { 
-          id: Date.now().toString(), 
-          name, 
-          price: Number(price), 
-          stock: Number(stock), 
-          count: 0 
-        };
+        const newProduct = { id: generatedId, name, price: Number(price), stock: Number(stock), count: 0 };
         products.push(newProduct);
         saveLocalStorageData();
         renderUI();
@@ -507,7 +506,16 @@ async function syncResetAllToCloud() {
           const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'products', productId);
           await setDoc(docRef, { count: newCount }, { merge: true });
 
-          // Add unlimited transaction log record
+          // 同步至 Google 試算表
+          syncUpdateQtyToCloud({
+            productId: prod.id,
+            productName: prod.name,
+            delta: actualDelta,
+            unitPrice: prod.price,
+            totalChange: actualDelta * prod.price,
+            afterCount: newCount
+          });
+
           const txColRef = collection(db, 'artifacts', appId, 'public', 'data', 'transactions');
           await addDoc(txColRef, {
             productName: prod.name,
@@ -524,21 +532,22 @@ async function syncResetAllToCloud() {
         }
       } else {
         prod.count = newCount;
-        transactions.unshift({
-          id: Date.now().toString(),
+        
+        // 同步至 Google 試算表 (離線備份模式)
+        syncUpdateQtyToCloud({
+          productId: prod.id,
           productName: prod.name,
           delta: actualDelta,
-          beforeCount: prevCount,
-          afterCount: newCount,
           unitPrice: prod.price,
           totalChange: actualDelta * prod.price,
-          localTime: Date.now()
+          afterCount: newCount
         });
+
+        transactions.unshift({ ... });
         saveLocalStorageData();
         renderUI();
         renderTransactions();
       }
-    }
 
     async function updateProductDetailsInDb(productId, name, price, stock, count) {
       if (isCloudSyncAvailable && db) {
@@ -589,16 +598,16 @@ async function syncResetAllToCloud() {
       }
     }
 
-    async function resetAllDataInDb() {
+   async function resetAllDataInDb() {
+      // 同步至 Google 試算表清空
+      syncResetAllToCloud();
+
       if (isCloudSyncAvailable && db) {
         try {
-          // 1. Reset product sales counts to 0
           for (const prod of products) {
             const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'products', prod.id);
             await setDoc(docRef, { count: 0 }, { merge: true });
           }
-
-          // 2. Delete all real-time transaction history logs from Firestore
           const txColRef = collection(db, 'artifacts', appId, 'public', 'data', 'transactions');
           for (const tx of transactions) {
             if (tx.id) {
@@ -606,13 +615,11 @@ async function syncResetAllToCloud() {
               await deleteDoc(txDocRef);
             }
           }
-
           showToast("已成功歸零所有銷售數量並清空異動日誌！", "info");
         } catch (e) {
           console.error("Failed resetting data:", e);
         }
       } else {
-        // Fallback for LocalStorage
         products.forEach(p => p.count = 0);
         transactions = [];
         saveLocalStorageData();
