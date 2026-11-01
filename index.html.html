@@ -317,7 +317,8 @@
     let currentUser = null;
     let isCloudSyncAvailable = false;
 
-    const appId = typeof __app_id !== 'undefined' ? __app_id : 'market-sales-tracker-shared-store-v1';
+    // 固定共用的 App ID，確保所有不同手機/電腦瀏覽器開啟時連線到同一份雲端資料庫
+    const appId = 'market-sales-tracker-shared-store-v1';
     const firebaseConfig = typeof __firebase_config !== 'undefined' 
       ? JSON.parse(__firebase_config) 
       : {
@@ -368,7 +369,6 @@
       const productsColRef = collection(db, 'artifacts', appId, 'public', 'data', 'products');
       const transactionsColRef = collection(db, 'artifacts', appId, 'public', 'data', 'transactions');
 
-      // 監聽商品資料：任何裝置新增或增減數量，此處會立刻自動收到通知並重新渲染畫面
       onSnapshot(productsColRef, (snapshot) => {
         const loadedProducts = [];
         snapshot.forEach((doc) => {
@@ -379,7 +379,6 @@
         renderUI();
       }, (error) => { console.error("Products sync error:", error); });
 
-      // 監聽異動日誌
       onSnapshot(transactionsColRef, (snapshot) => {
         const loadedTx = [];
         snapshot.forEach((doc) => {
@@ -600,6 +599,7 @@
               ? 'bg-amber-100 text-amber-800 border-amber-200' 
               : 'bg-emerald-100 text-emerald-800 border-emerald-200';
 
+          // [UI 優化] 將數量控制按鈕 (＋ / －) 與「銷售金額小計」緊鄰排列在商品卡片右下方，方便視覺對焦
           gridHtml += `
             <div class="bg-white rounded-2xl p-4 shadow-sm border border-stone-200 hover:shadow-md transition flex flex-col justify-between">
               <div>
@@ -636,22 +636,23 @@
                 </div>
               </div>
 
-              <div class="mt-4 pt-3 border-t border-stone-100 flex items-center justify-between">
-                <div>
-                  <span class="text-[11px] text-stone-400 block">銷售金額小計</span>
-                  <span class="text-lg font-black text-emerald-800">NT$ ${subtotal.toLocaleString()}</span>
+              <!-- 視覺對焦優化：金額小計與數量增減按鈕並排於底部 -->
+              <div class="mt-4 pt-3 border-t border-stone-100 flex items-center justify-between gap-2">
+                <div class="bg-emerald-50/60 px-3 py-1.5 rounded-xl border border-emerald-100 flex-grow">
+                  <span class="text-[10px] text-emerald-700 block font-medium">銷售金額小計</span>
+                  <span class="text-base font-black text-emerald-800">NT$ ${subtotal.toLocaleString()}</span>
                 </div>
 
-                <div class="flex items-center bg-stone-100 p-1 rounded-xl gap-2">
+                <div class="flex items-center bg-stone-100 p-1 rounded-xl gap-2 flex-shrink-0">
                   <button onclick="changeQty('${prod.id}', -1)" 
-                    class="w-12 h-12 bg-white hover:bg-rose-50 text-rose-600 font-bold rounded-xl shadow-sm border border-stone-200 active:scale-95 flex items-center justify-center text-xl transition">
+                    class="w-11 h-11 bg-white hover:bg-rose-50 text-rose-600 font-bold rounded-xl shadow-sm border border-stone-200 active:scale-95 flex items-center justify-center text-lg transition">
                     <i class="fa-solid fa-minus"></i>
                   </button>
                   
-                  <span class="w-8 text-center font-black text-xl text-stone-800">${count}</span>
+                  <span class="w-7 text-center font-black text-lg text-stone-800">${count}</span>
 
                   <button onclick="changeQty('${prod.id}', 1)" 
-                    class="w-12 h-12 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-md active:scale-95 flex items-center justify-center text-xl transition">
+                    class="w-11 h-11 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-md active:scale-95 flex items-center justify-center text-lg transition">
                     <i class="fa-solid fa-plus"></i>
                   </button>
                 </div>
