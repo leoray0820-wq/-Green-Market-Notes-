@@ -293,6 +293,7 @@
 
   <!-- Firebase Integration Script (v11 API) -->
   <script type="module">
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzhtpygnZZIxIp0FimUVaBtwAGBHsSz2Uq6Afl_UtXfd_yvafInjznYIR3RjdOsfJ-O/exec";
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, collection, query, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
