@@ -610,17 +610,7 @@
                     單價: <span class="font-bold text-emerald-700 text-sm">NT$ ${price}</span>
                   </div>
                 </div>
-                <div class="flex items-center gap-1">
-                  <button onclick="openEditModal('${prod.id}')" title="編輯" class="text-stone-400 hover:text-stone-600 p-1.5 rounded-lg hover:bg-stone-100 text-xs transition">
-                    <i class="fa-solid fa-pen"></i>
-                  </button>
-                  <button onclick="confirmDeleteProduct('${prod.id}', '${escapeHtml(prod.name)}')" title="刪除" class="text-rose-400 hover:text-rose-600 p-1.5 rounded-lg hover:bg-rose-50 text-xs transition">
-                    <i class="fa-solid fa-trash"></i>
-                  </button>
-                </div>
-              </div>
-
-              <!-- 第二行：金額小計與數量增減按鈕緊鄰排列 -->
+                 <!-- 第二行：金額小計與數量增減按鈕緊鄰排列 -->
               <div class="flex items-center justify-between gap-2 bg-stone-50/80 p-2 rounded-xl border border-stone-100">
                 <div>
                   <span class="text-[10px] text-stone-400 block font-medium">銷售金額小計</span>
@@ -641,6 +631,17 @@
                   </button>
                 </div>
               </div>
+                <div class="flex items-center gap-1">
+                  <button onclick="openEditModal('${prod.id}')" title="編輯" class="text-stone-400 hover:text-stone-600 p-1.5 rounded-lg hover:bg-stone-100 text-xs transition">
+                    <i class="fa-solid fa-pen"></i>
+                  </button>
+                  <button onclick="confirmDeleteProduct('${prod.id}', '${escapeHtml(prod.name)}')" title="刪除" class="text-rose-400 hover:text-rose-600 p-1.5 rounded-lg hover:bg-rose-50 text-xs transition">
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
+                </div>
+              </div>
+
+             
 
               <!-- 第三行：進貨量、已售量與剩餘庫存數據 -->
               <div class="grid grid-cols-3 gap-2 text-center text-xs pt-1">
