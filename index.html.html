@@ -34,22 +34,10 @@
   </script>
 
   <style>
-    /* Custom scrollbars */
-    ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-    ::-webkit-scrollbar-track {
-      background: #f1f1f1;
-      border-radius: 4px;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #cbd5e1;
-      border-radius: 4px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #94a3b8;
-    }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
   </style>
 </head>
 <body class="bg-stone-50 text-stone-800 font-sans min-h-screen flex flex-col justify-between selection:bg-emerald-100 selection:text-emerald-800">
@@ -64,8 +52,8 @@
         <div>
           <h1 class="font-bold text-lg leading-tight">市集銷售隨手記</h1>
           <p class="text-xs text-emerald-200 flex items-center gap-1.5">
-            <span id="sync-status-indicator" class="w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block animate-pulse"></span>
-            <span id="sync-status-text">雲端連線中...</span>
+            <span id="sync-status-indicator" class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span>
+            <span id="sync-status-text">連線初始化中...</span>
           </p>
         </div>
       </div>
@@ -105,8 +93,6 @@
 
     <!-- TAB 1: SALES MAIN PAGE -->
     <section id="tab-sales" class="space-y-6">
-
-      <!-- Quick Add New Product Bar -->
       <div class="bg-white p-5 rounded-2xl shadow-sm border border-stone-200">
         <h2 class="text-sm font-bold text-stone-700 mb-3 flex items-center gap-2">
           <i class="fa-solid fa-cart-plus text-emerald-600"></i> 新增展售商品品項與備貨量
@@ -135,21 +121,18 @@
         </form>
       </div>
 
-      <!-- Products Grid -->
       <div>
         <div class="flex items-center justify-between mb-3">
           <h2 class="text-base font-bold text-stone-800 flex items-center gap-2">
-            <i class="fa-solid fa-boxes-stacked text-amber-600"></i> 目前展售商品列表
+            <i class="fa-solid fa-boxes-stacked text-amber-600"></i> 目前展售商品列表 (多裝置實時同步)
           </h2>
-          <span class="text-xs text-stone-500">點擊 ＋ / － 按鈕即時紀錄並同步雲端數據</span>
+          <span class="text-xs text-stone-500">點擊 ＋ / － 按鈕所有裝置將同步更新</span>
         </div>
 
         <div id="product-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <!-- Empty State by Default -->
           <div class="col-span-full py-12 text-center text-stone-400 bg-white rounded-2xl border border-dashed border-stone-300">
-            <i class="fa-solid fa-box-open text-4xl mb-3 text-stone-300"></i>
-            <p class="font-medium text-stone-500">目前展售列表為空白</p>
-            <p class="text-xs text-stone-400 mt-1">請使用上方「新增展售商品品項與備貨量」表單建立新商品</p>
+            <i class="fa-solid fa-spinner fa-spin text-3xl mb-3 text-emerald-600"></i>
+            <p class="font-medium text-stone-500">正在從雲端同步載入資料...</p>
           </div>
         </div>
       </div>
@@ -157,13 +140,11 @@
 
     <!-- TAB 2: RECONCILIATION & HISTORY -->
     <section id="tab-history" class="space-y-6 hidden">
-      
-      <!-- End of Day Reconciliation Box -->
       <div class="bg-gradient-to-br from-amber-50 to-orange-50 p-5 rounded-2xl shadow-sm border border-amber-200/80">
         <h2 class="text-base font-bold text-amber-900 mb-2 flex items-center gap-2">
           <i class="fa-solid fa-calculator text-amber-600"></i> 收攤清點與現金對帳工具
         </h2>
-        <p class="text-xs text-amber-700 mb-4">輸入您收攤現場點算後的實際現金總額，自動比對帳目是否有短少或溢收 (盤盈/盤虧)。</p>
+        <p class="text-xs text-amber-700 mb-4">輸入您收攤現場點算後的實際現金總額，自動比對帳目是否有短少或溢收。</p>
         
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-white p-4 rounded-xl border border-amber-200">
           <div>
@@ -182,7 +163,6 @@
         </div>
       </div>
 
-      <!-- Action Toolbar -->
       <div class="flex flex-wrap items-center justify-between gap-3 bg-white p-4 rounded-2xl shadow-sm border border-stone-200">
         <div>
           <h2 class="text-base font-bold text-stone-800">庫存總覽與數據報表</h2>
@@ -198,7 +178,6 @@
         </div>
       </div>
 
-      <!-- Item Inventory & Sales Summary Table -->
       <div class="bg-white rounded-2xl shadow-sm border border-stone-200 overflow-hidden">
         <div class="px-5 py-4 border-b border-stone-100 flex items-center justify-between">
           <h3 class="font-bold text-stone-800 text-sm flex items-center gap-2">
@@ -224,7 +203,6 @@
         </div>
       </div>
 
-      <!-- Unlimited Transaction Log -->
       <div class="bg-white rounded-2xl shadow-sm border border-stone-200 overflow-hidden">
         <div class="px-5 py-4 border-b border-stone-100 flex items-center justify-between">
           <h3 class="font-bold text-stone-800 text-sm flex items-center gap-2">
@@ -236,15 +214,13 @@
           <div class="p-6 text-center text-stone-400 text-xs">暫無點數異動紀錄</div>
         </div>
       </div>
-
     </section>
-
   </main>
 
   <!-- Footer -->
   <footer class="bg-white border-t border-stone-200 py-4 text-center text-xs text-stone-400">
     <div class="max-w-5xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-2">
-      <p>市集銷售隨手記 &copy; 2026 - 雲端即時同步與盤點對帳系統</p>
+      <p>市集銷售隨手記 &copy; 2026 - 跨裝置雲端實時同步系統</p>
       <p class="flex items-center gap-1.5 text-stone-500">
         <i class="fa-solid fa-cloud text-emerald-600"></i> 狀態: <span id="firebase-status">初始化中...</span>
       </p>
@@ -288,19 +264,16 @@
     </div>
   </div>
 
-  <!-- Custom Alert/Confirm Toast Notification Container -->
   <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm"></div>
 
-  <!-- Main Integration Script -->
+  <!-- Main Firebase & Google Sheets Sync Script -->
   <script type="module">
-    // 請填入您最新的 Google Apps Script 部署 Web App 網址 (/exec 結尾)
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwRgTYxvHU4OQnaNMXFV-sxG1mWqZ7wMQYu-GAVMLs06EfWMV7VS-fik6dNFQeEk6rB/exec";
 
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    // Google Apps Script Cloud Sync Helpers
     async function syncAddProductToCloud(product) {
       if (!GOOGLE_SCRIPT_URL) return;
       try {
@@ -310,9 +283,7 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ action: 'addProduct', ...product })
         });
-      } catch (err) {
-        console.error("GAS 雲端新增失敗:", err);
-      }
+      } catch (err) { console.error("GAS sync error:", err); }
     }
 
     async function syncUpdateQtyToCloud(txData) {
@@ -324,9 +295,7 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ action: 'updateQuantity', ...txData })
         });
-      } catch (err) {
-        console.error("GAS 雲端更新數量失敗:", err);
-      }
+      } catch (err) { console.error("GAS sync error:", err); }
     }
 
     async function syncResetAllToCloud() {
@@ -338,12 +307,9 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ action: 'resetAll' })
         });
-      } catch (err) {
-        console.error("GAS 雲端重置失敗:", err);
-      }
+      } catch (err) { console.error("GAS sync error:", err); }
     }
 
-    // Application state
     let products = [];
     let transactions = [];
     let db = null;
@@ -351,8 +317,7 @@
     let currentUser = null;
     let isCloudSyncAvailable = false;
 
-    // Config setup
-    const appId = typeof __app_id !== 'undefined' ? __app_id : 'market-sales-tracker-app';
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'market-sales-tracker-shared-store-v1';
     const firebaseConfig = typeof __firebase_config !== 'undefined' 
       ? JSON.parse(__firebase_config) 
       : {
@@ -364,7 +329,6 @@
           appId: "1:123456789:web:abcdef"
         };
 
-    // Initialize Firebase
     try {
       const app = initializeApp(firebaseConfig);
       db = getFirestore(app);
@@ -378,26 +342,23 @@
         }
       };
 
-      initAuth().catch(err => {
-        console.warn("Firebase Auth fallback to local mode:", err);
-        updateSyncStatus(false, "離線/單機備份模式");
-      });
+      initAuth().catch(err => { console.warn("Auth fallback", err); });
 
       onAuthStateChanged(auth, (user) => {
         if (user) {
           currentUser = user;
           isCloudSyncAvailable = true;
-          updateSyncStatus(true, "雲端實時同步中");
+          updateSyncStatus(true, "跨裝置雲端實時同步中");
           setupRealtimeListeners();
         } else {
           isCloudSyncAvailable = false;
-          updateSyncStatus(false, "單機離線紀錄模式");
+          updateSyncStatus(false, "單機離線模式");
           loadLocalStorageData();
         }
       });
     } catch (e) {
-      console.warn("Firebase Init Exception, using local storage:", e);
-      updateSyncStatus(false, "離線備份模式");
+      console.warn("Firebase Init Exception", e);
+      updateSyncStatus(false, "離線儲存模式");
       loadLocalStorageData();
     }
 
@@ -407,20 +368,18 @@
       const productsColRef = collection(db, 'artifacts', appId, 'public', 'data', 'products');
       const transactionsColRef = collection(db, 'artifacts', appId, 'public', 'data', 'transactions');
 
+      // 監聽商品資料：任何裝置新增或增減數量，此處會立刻自動收到通知並重新渲染畫面
       onSnapshot(productsColRef, (snapshot) => {
         const loadedProducts = [];
         snapshot.forEach((doc) => {
           loadedProducts.push({ id: doc.id, ...doc.data() });
         });
-        
         products = loadedProducts;
         saveLocalStorageData();
         renderUI();
-      }, (error) => {
-        console.error("Products subscription error:", error);
-        updateSyncStatus(false, "網路連線受限");
-      });
+      }, (error) => { console.error("Products sync error:", error); });
 
+      // 監聽異動日誌
       onSnapshot(transactionsColRef, (snapshot) => {
         const loadedTx = [];
         snapshot.forEach((doc) => {
@@ -433,9 +392,7 @@
         });
         saveLocalStorageData();
         renderTransactions();
-      }, (error) => {
-        console.error("Transactions subscription error:", error);
-      });
+      }, (error) => { console.error("Transactions sync error:", error); });
     }
 
     function loadLocalStorageData() {
@@ -444,9 +401,7 @@
         const cachedTx = localStorage.getItem('market_tx');
         if (cachedProd) products = JSON.parse(cachedProd);
         if (cachedTx) transactions = JSON.parse(cachedTx);
-      } catch(e) {
-        console.error("Failed to load local cache", e);
-      }
+      } catch(e) {}
       renderUI();
       renderTransactions();
     }
@@ -455,16 +410,11 @@
       try {
         localStorage.setItem('market_products', JSON.stringify(products));
         localStorage.setItem('market_tx', JSON.stringify(transactions));
-      } catch(e) {
-        console.error("Failed to save local cache", e);
-      }
+      } catch(e) {}
     }
 
-    // Database CRUD & Cloud Sync Operations
     async function createProductInDb(name, price, stock = 0) {
       const generatedId = Date.now().toString();
-
-      // 發送至 Google 試算表
       syncAddProductToCloud({ id: generatedId, name, price: Number(price), stock: Number(stock) });
 
       if (isCloudSyncAvailable && db) {
@@ -478,12 +428,9 @@
             updatedAt: serverTimestamp()
           });
           showToast(`已成功新增品項: ${name}`, "success");
-        } catch (err) {
-          console.error("Failed adding product:", err);
-        }
+        } catch (err) { console.error(err); }
       } else {
-        const newProduct = { id: generatedId, name, price: Number(price), stock: Number(stock), count: 0 };
-        products.push(newProduct);
+        products.push({ id: generatedId, name, price: Number(price), stock: Number(stock), count: 0 });
         saveLocalStorageData();
         renderUI();
         showToast(`已新增品項: ${name}`, "success");
@@ -499,7 +446,6 @@
       const actualDelta = newCount - prevCount;
       if (actualDelta === 0 && delta < 0) return;
 
-      // 發送至 Google 試算表
       syncUpdateQtyToCloud({
         productId: prod.id,
         productName: prod.name,
@@ -525,9 +471,7 @@
             timestamp: serverTimestamp(),
             localTime: Date.now()
           });
-        } catch (err) {
-          console.error("Error updating quantity:", err);
-        }
+        } catch (err) { console.error(err); }
       } else {
         prod.count = newCount;
         transactions.unshift({
@@ -557,10 +501,8 @@
             count: Number(count),
             updatedAt: serverTimestamp()
           }, { merge: true });
-          showToast("商品及備貨資料已更新", "success");
-        } catch (err) {
-          console.error("Error saving edit:", err);
-        }
+          showToast("商品資料已更新", "success");
+        } catch (err) { console.error(err); }
       } else {
         const prod = products.find(p => p.id === productId);
         if (prod) {
@@ -571,7 +513,7 @@
         }
         saveLocalStorageData();
         renderUI();
-        showToast("商品及備貨資料已更新", "success");
+        showToast("商品資料已更新", "success");
       }
     }
 
@@ -584,9 +526,7 @@
           const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'products', productId);
           await deleteDoc(docRef);
           showToast(`已刪除 ${prod.name}`, "info");
-        } catch (err) {
-          console.error("Error deleting product:", err);
-        }
+        } catch (err) { console.error(err); }
       } else {
         products = products.filter(p => p.id !== productId);
         saveLocalStorageData();
@@ -596,7 +536,6 @@
     }
 
     async function resetAllDataInDb() {
-      // 發送重置信號至 Google 試算表
       syncResetAllToCloud();
 
       if (isCloudSyncAvailable && db) {
@@ -605,7 +544,6 @@
             const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'products', prod.id);
             await setDoc(docRef, { count: 0 }, { merge: true });
           }
-
           for (const tx of transactions) {
             if (tx.id) {
               const txDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'transactions', tx.id);
@@ -613,20 +551,17 @@
             }
           }
           showToast("已成功歸零所有銷售數量並清空異動日誌！", "info");
-        } catch (e) {
-          console.error("Failed resetting data:", e);
-        }
+        } catch (e) { console.error(e); }
       } else {
         products.forEach(p => p.count = 0);
         transactions = [];
         saveLocalStorageData();
         renderUI();
         renderTransactions();
-        showToast("已歸零銷售量與歷史紀錄", "info");
+        showToast("已歸零", "info");
       }
     }
 
-    // UI Rendering Functions
     function renderUI() {
       const grid = document.getElementById('product-list');
       const summaryTable = document.getElementById('summary-table-body');
@@ -639,11 +574,11 @@
         grid.innerHTML = `
           <div class="col-span-full py-12 text-center text-stone-400 bg-white rounded-2xl border border-dashed border-stone-300">
             <i class="fa-solid fa-box-open text-4xl mb-3 text-stone-300"></i>
-            <p class="font-medium text-stone-500">目前展售列表為空白</p>
-            <p class="text-xs text-stone-400 mt-1">請使用上方「新增展售商品品項與備貨量」表單建立新商品</p>
+            <p class="font-medium text-stone-500">目前展售列表為空白（所有裝置連線同步中）</p>
+            <p class="text-xs text-stone-400 mt-1">請使用上方表單新增品項，任一裝置新增後全體自動同步</p>
           </div>
         `;
-        summaryTable.innerHTML = `<tr><td colspan="6" class="px-5 py-6 text-center text-stone-400 text-xs">尚無商品數據，請先新增品項</td></tr>`;
+        summaryTable.innerHTML = `<tr><td colspan="6" class="px-5 py-6 text-center text-stone-400 text-xs">尚無商品數據</td></tr>`;
       } else {
         let gridHtml = '';
         let tableHtml = '';
@@ -676,10 +611,10 @@
                     </div>
                   </div>
                   <div class="flex items-center gap-1">
-                    <button onclick="openEditModal('${prod.id}')" title="編輯品項與備貨" class="text-stone-400 hover:text-stone-600 p-1.5 rounded-lg hover:bg-stone-100 text-xs transition">
+                    <button onclick="openEditModal('${prod.id}')" title="編輯" class="text-stone-400 hover:text-stone-600 p-1.5 rounded-lg hover:bg-stone-100 text-xs transition">
                       <i class="fa-solid fa-pen"></i>
                     </button>
-                    <button onclick="confirmDeleteProduct('${prod.id}', '${escapeHtml(prod.name)}')" title="刪除品項" class="text-rose-400 hover:text-rose-600 p-1.5 rounded-lg hover:bg-rose-50 text-xs transition">
+                    <button onclick="confirmDeleteProduct('${prod.id}', '${escapeHtml(prod.name)}')" title="刪除" class="text-rose-400 hover:text-rose-600 p-1.5 rounded-lg hover:bg-rose-50 text-xs transition">
                       <i class="fa-solid fa-trash"></i>
                     </button>
                   </div>
@@ -828,8 +763,8 @@
 
       if (isOnline) {
         indicator.className = 'w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block animate-pulse';
-        textSpan.innerText = text || '雲端同步中';
-        footerStatus.innerText = '雲端即時同步與自動對帳模式';
+        textSpan.innerText = text || '多裝置實時同步中';
+        footerStatus.innerText = '雲端雙向實時同步中';
       } else {
         indicator.className = 'w-2.5 h-2.5 rounded-full bg-amber-400 inline-block';
         textSpan.innerText = text || '單機離線模式';
@@ -955,13 +890,11 @@
       if (tabName === 'sales') {
         salesTab.classList.remove('hidden');
         historyTab.classList.add('hidden');
-
         salesBtn.className = "px-3.5 py-1.5 rounded-lg transition-all duration-200 bg-white text-emerald-900 shadow font-semibold";
         historyBtn.className = "px-3.5 py-1.5 rounded-lg transition-all duration-200 text-emerald-100 hover:text-white";
       } else {
         salesTab.classList.add('hidden');
         historyTab.classList.remove('hidden');
-
         historyBtn.className = "px-3.5 py-1.5 rounded-lg transition-all duration-200 bg-white text-emerald-900 shadow font-semibold";
         salesBtn.className = "px-3.5 py-1.5 rounded-lg transition-all duration-200 text-emerald-100 hover:text-white";
       }
@@ -970,38 +903,22 @@
     function escapeHtml(str) {
       if (!str) return '';
       return str.replace(/[&<>"']/g, function(m) {
-        return {
-          '&': '&amp;',
-          '<': '&lt;',
-          '>': '&gt;',
-          '"': '&quot;',
-          "'": '&#039;'
-        }[m];
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
       });
     }
 
     function showToast(message, type = "info") {
       const container = document.getElementById('toast-container');
       const toast = document.createElement('div');
-      
       let bgColor = "bg-stone-800 text-white";
       if (type === "success") bgColor = "bg-emerald-700 text-white";
       if (type === "error") bgColor = "bg-rose-700 text-white";
 
       toast.className = `${bgColor} text-xs font-semibold px-4 py-3 rounded-xl shadow-lg flex items-center justify-between gap-3 transform transition-all duration-300 translate-y-2 opacity-0`;
-      toast.innerHTML = `
-        <span>${message}</span>
-        <button onclick="this.parentElement.remove()" class="text-white/80 hover:text-white">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-      `;
+      toast.innerHTML = `<span>${message}</span><button onclick="this.parentElement.remove()" class="text-white/80 hover:text-white"><i class="fa-solid fa-xmark"></i></button>`;
 
       container.appendChild(toast);
-      
-      setTimeout(() => {
-        toast.classList.remove('translate-y-2', 'opacity-0');
-      }, 10);
-
+      setTimeout(() => { toast.classList.remove('translate-y-2', 'opacity-0'); }, 10);
       setTimeout(() => {
         toast.classList.add('opacity-0');
         setTimeout(() => toast.remove(), 300);
