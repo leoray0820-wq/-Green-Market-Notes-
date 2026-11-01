@@ -152,7 +152,7 @@
             <span id="reconcile-expected-total" class="text-xl font-extrabold text-emerald-700">NT$ 0</span>
           </div>
           <div>
-            <label class="text-xs font-bold text-stone-700 block mb-1">實際點算現金總額 (NT$)</label>
+            <label class="text-xs font-bold text-stone-700 block mb-1">實際抽屜點算現金總額 (NT$)</label>
             <input type="number" id="actual-cash-input" oninput="calculateDifference()" placeholder="輸入金額..."
               class="w-full px-3 py-1.5 rounded-lg border border-stone-300 text-base font-bold focus:ring-2 focus:ring-emerald-500 focus:outline-none">
           </div>
@@ -206,7 +206,7 @@
       <div class="bg-white rounded-2xl shadow-sm border border-stone-200 overflow-hidden">
         <div class="px-5 py-4 border-b border-stone-100 flex items-center justify-between">
           <h3 class="font-bold text-stone-800 text-sm flex items-center gap-2">
-            <i class="fa-solid fa-clock-rotate-left text-amber-600"></i> 實時點數異動日誌
+            <i class="fa-solid fa-clock-rotate-left text-amber-600"></i> 實時點數異動日誌 (無上限完整留存)
           </h3>
           <span id="log-count-badge" class="text-xs bg-stone-100 text-stone-600 px-2 py-0.5 rounded-full font-medium">0 筆紀錄</span>
         </div>
@@ -268,7 +268,7 @@
 
   <!-- Main Firebase & Google Sheets Sync Script -->
   <script type="module">
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwRgTYxvHU4OQnaNMXFV-sxG1mWqZ7wMQYu-GAVMLs06EfWMV7VS-fik6dNFQeEk6rB/exec";
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbywgjmTfp0V3bknHKOPXSp60aLUcgABviBm1WBqiIbmuPhkg0uxgTdpniMmuMTsc20x/exec";
 
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -317,6 +317,7 @@
     let currentUser = null;
     let isCloudSyncAvailable = false;
 
+    // 固定共用頻道識別碼，確保跨裝置連結同一雲端資料庫
     const appId = 'market-sales-tracker-shared-store-v1';
     const firebaseConfig = typeof __firebase_config !== 'undefined' 
       ? JSON.parse(__firebase_config) 
@@ -598,40 +599,17 @@
               ? 'bg-amber-100 text-amber-800 border-amber-200' 
               : 'bg-emerald-100 text-emerald-800 border-emerald-200';
 
-          // [版面調整] 將「商品品項名稱/單價」與「修改刪除按鈕」擺在上方，
-          // 而「金額小計」與「數量增減按鈕 (＋ / －)」移至中間緊鄰排列，讓點擊和視覺對焦更順手！
+          // 新版 UI 結構：第一行標題與編輯按鈕，第二行「小計」與「加減按鈕」緊鄰排列，第三行庫存數據
           gridHtml += `
             <div class="bg-white rounded-2xl p-4 shadow-sm border border-stone-200 hover:shadow-md transition flex flex-col justify-between space-y-3">
-              <!-- 第一行：商品名稱、單價與編輯刪除按鈕 -->
-              <div class="flex items-start justify-between border-b border-stone-100 pb-3">
+              <!-- 1. 商品名稱、單價與編輯刪除按鈕 -->
+              <div class="flex items-start justify-between border-b border-stone-100 pb-2">
                 <div>
                   <h3 class="font-bold text-lg text-stone-800 leading-tight">${escapeHtml(prod.name)}</h3>
                   <div class="text-xs text-stone-500 mt-1">
                     單價: <span class="font-bold text-emerald-700 text-sm">NT$ ${price}</span>
                   </div>
                 </div>
-                 <!-- 第二行：金額小計與數量增減按鈕緊鄰排列 -->
-             
-                <div class="flex items-center bg-white p-1 rounded-xl gap-2 shadow-sm border border-stone-200">
-                  <button onclick="changeQty('${prod.id}', -1)" 
-                    class="w-10 h-10 bg-stone-100 hover:bg-rose-50 text-rose-600 font-bold rounded-lg active:scale-95 flex items-center justify-center text-lg transition">
-                    <i class="fa-solid fa-minus"></i>
-                  </button>     
-                
-                  <span class="w-8 text-center font-black text-lg text-stone-800">${count}</span>
-
-                  <button onclick="changeQty('${prod.id}', 1)" 
-                    class="w-10 h-10 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg shadow active:scale-95 flex items-center justify-center text-lg transition">
-                    <i class="fa-solid fa-plus"></i>
-                  </button>
-                </div>
-                  <div class="flex items-center justify-between gap-2 bg-stone-50/80 p-2 rounded-xl border border-stone-100">
-                <div>
-                  <span class="text-[10px] text-stone-400 block font-medium">銷售金額小計</span>
-                  <span class="text-base font-black text-emerald-800">NT$ ${subtotal.toLocaleString()}</span>
-                </div>
-              </div>
-
                 <div class="flex items-center gap-1">
                   <button onclick="openEditModal('${prod.id}')" title="編輯" class="text-stone-400 hover:text-stone-600 p-1.5 rounded-lg hover:bg-stone-100 text-xs transition">
                     <i class="fa-solid fa-pen"></i>
@@ -642,9 +620,29 @@
                 </div>
               </div>
 
-             
+              <!-- 2. 小計與數量增減按鈕緊鄰排列於中央核心操作區 -->
+              <div class="flex items-center justify-between gap-2 bg-stone-50/80 p-2 rounded-xl border border-stone-100">
+                <div>
+                  <span class="text-[10px] text-stone-400 block font-medium">銷售金額小計</span>
+                  <span class="text-base font-black text-emerald-800">NT$ ${subtotal.toLocaleString()}</span>
+                </div>
 
-              <!-- 第三行：進貨量、已售量與剩餘庫存數據 -->
+                <div class="flex items-center bg-white p-1 rounded-xl gap-2 shadow-sm border border-stone-200">
+                  <button onclick="changeQty('${prod.id}', -1)" 
+                    class="w-10 h-10 bg-stone-100 hover:bg-rose-50 text-rose-600 font-bold rounded-lg active:scale-95 flex items-center justify-center text-lg transition">
+                    <i class="fa-solid fa-minus"></i>
+                  </button>
+                  
+                  <span class="w-8 text-center font-black text-lg text-stone-800">${count}</span>
+
+                  <button onclick="changeQty('${prod.id}', 1)" 
+                    class="w-10 h-10 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg shadow active:scale-95 flex items-center justify-center text-lg transition">
+                    <i class="fa-solid fa-plus"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- 3. 進貨量、已售量與剩餘庫存資訊 -->
               <div class="grid grid-cols-3 gap-2 text-center text-xs pt-1">
                 <div class="bg-stone-50 p-1.5 rounded-xl border border-stone-100">
                   <span class="text-stone-400 block text-[10px]">進貨總量</span>
