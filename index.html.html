@@ -306,12 +306,12 @@
           saveLocalStorageData();
           renderUI();
           renderTransactions();
-          updateSyncStatus(true, "操作即時同步雲端");
+          updateSyncStatus(true, "雲端管理");
         })
         .catch(err => {
           console.error("雲端讀取失敗:", err);
           loadLocalStorageData();
-          updateSyncStatus(false, "網路連線異常 (已載入本機快取)");
+          updateSyncStatus(false, "離線作業");
         })
         .finally(() => {
           if (syncIcon) syncIcon.classList.remove('fa-spin');
@@ -345,7 +345,7 @@
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify(payload)
         });
-        updateSyncStatus(true, "操作即時同步雲端");
+        updateSyncStatus(true, "雲端管理");
       } catch (err) {
         console.error("自動同步失敗:", err);
         updateSyncStatus(false, "雲端同步失敗");
@@ -493,7 +493,7 @@
           <div class="col-span-full py-12 text-center text-stone-400 bg-white rounded-2xl border border-dashed border-stone-300">
             <i class="fa-solid fa-box-open text-4xl mb-3 text-stone-300"></i>
             <p class="font-medium text-stone-500">目前展售列表為空白</p>
-            <p class="text-xs text-stone-400 mt-1">請前往「盤點與統計」頁面新增商品品項</p>
+            <p class="text-xs text-stone-400 mt-1">請前往「盤點」頁面新增商品品項</p>
           </div>
         `;
         summaryTable.innerHTML = `<tr><td colspan="7" class="px-5 py-6 text-center text-stone-400 text-xs">尚無商品數據</td></tr>`;
@@ -650,8 +650,8 @@
 
       if (isOnline) {
         indicator.className = 'w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block';
-        textSpan.innerText = text || '操作即時同步雲端';
-        footerStatus.innerText = 'Google 試算表自動同步成功';
+        textSpan.innerText = text || '雲端管理';
+        footerStatus.innerText = '同步雲端';
       } else {
         indicator.className = 'w-2.5 h-2.5 rounded-full bg-amber-400 inline-block';
         textSpan.innerText = text || '離線模式';
