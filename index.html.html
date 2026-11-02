@@ -97,7 +97,7 @@
   <!-- Main Content Container -->
   <main class="max-w-5xl mx-auto px-4 py-6 flex-grow w-full">
 
-    <!-- TAB 1: SALES MAIN PAGE (極簡操作頁面) -->
+    <!-- TAB 1: SALES MAIN PAGE -->
     <section id="tab-sales" class="space-y-4">
       <div class="flex items-center justify-between">
         <h2 class="text-base font-bold text-stone-800 flex items-center gap-2">
@@ -113,7 +113,7 @@
       </div>
     </section>
 
-    <!-- TAB 2: RECONCILIATION & HISTORY (後台資料管理與盤點) -->
+    <!-- TAB 2: RECONCILIATION & HISTORY -->
     <section id="tab-history" class="space-y-6 hidden">
       <!-- 新增品項表單 -->
       <div class="bg-white p-5 rounded-2xl shadow-sm border border-stone-200">
@@ -152,7 +152,7 @@
         
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-white p-4 rounded-xl border border-amber-200">
           <div>
-            <span class="text-xs text-stone-500 block mb-1">理論應收總金額</span>
+            <span class="text-xs text-stone-500 block mb-1">應收總金額</span>
             <span id="reconcile-expected-total" class="text-xl font-extrabold text-emerald-700">NT$ 0</span>
           </div>
           <div>
@@ -273,22 +273,21 @@
 
   <!-- Main Logic Script -->
   <script>
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzTKaPB3iG8nNYHfS45VPPf9wmx8Rsj5-Ko_ZoYVfhGKBqhXvCMrRDxLjPmVoVn6lll/exec";
+    // 填入您新建部署後取得的 Web 應用程式 URL
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxk4VRi65F81mUc4vFKiAxc9okM7-OSs87rGRR3Aup7d31sV2bEqI2yMfBTuqR8wt5t/exec";
 
     let products = [];
     let transactions = [];
 
     window.onload = function() {
-      // 1. 頁面剛載入時抓取雲端資料
       loadCloudData();
 
-      // 2. 當使用者將手機或電腦分頁切回前景（代表可能別台裝置剛操作過），自動同步抓取最新狀態
+      // 切換回分頁時自動同步最新數據
       window.onfocus = function() {
         loadCloudData();
       };
     };
 
-    // 從 GAS 抓取試算表資料
     function loadCloudData() {
       const syncIcon = document.getElementById('sync-icon');
       if (syncIcon) syncIcon.classList.add('fa-spin');
@@ -337,13 +336,12 @@
       } catch(e) {}
     }
 
-    // 發送背景同步請求（動作觸發時呼叫）
+    // 發送 POST 寫入請求，修復跨網域 CORS 問題
     async function triggerCloudSync(payload) {
       updateSyncStatus(true, "正在同步更新至雲端...");
       try {
         await fetch(GOOGLE_SCRIPT_URL, {
           method: 'POST',
-          mode: 'no-cors',
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify(payload)
         });
@@ -354,7 +352,6 @@
       }
     }
 
-    // 核心點數異動 (按下 ＋ / － 立即更新畫面並觸發同步)
     async function changeQty(productId, delta) {
       const prod = products.find(p => p.id === productId);
       if (!prod) return;
@@ -364,7 +361,7 @@
       const actualDelta = newCount - prevCount;
       if (actualDelta === 0 && delta < 0) return;
 
-      // 1. 本地樂觀更新 UI
+      // 樂觀更新 UI
       prod.count = newCount;
       transactions.unshift({
         id: Date.now().toString(),
@@ -380,7 +377,7 @@
       renderUI();
       renderTransactions();
 
-      // 2. 觸發 POST 同步至雲端
+      // 發送寫入請求
       triggerCloudSync({
         action: 'updateQuantity',
         productId: prod.id,
@@ -392,7 +389,6 @@
       });
     }
 
-    // 新增商品
     async function handleCreateProduct(event) {
       event.preventDefault();
       const nameInput = document.getElementById('new-product-name');
@@ -428,7 +424,6 @@
       });
     }
 
-    // 保存編輯
     async function handleSaveEdit(event) {
       event.preventDefault();
       const id = document.getElementById('edit-product-id').value;
@@ -461,7 +456,6 @@
       });
     }
 
-    // 刪除商品
     async function confirmDeleteProduct(productId, productName) {
       showCustomConfirm(`確定要刪除商品「${productName}」嗎？`, () => {
         products = products.filter(p => p.id !== productId);
@@ -473,7 +467,6 @@
       });
     }
 
-    // 重置歸零
     async function confirmResetSession() {
       showCustomConfirm("確定要重置歸零嗎？此動作將會「歸零所有銷售數量」並「完全清空點數異動日誌」。", () => {
         products.forEach(p => p.count = 0);
@@ -487,7 +480,6 @@
       });
     }
 
-    // 渲染銷售主頁與報表
     function renderUI() {
       const grid = document.getElementById('product-list');
       const summaryTable = document.getElementById('summary-table-body');
