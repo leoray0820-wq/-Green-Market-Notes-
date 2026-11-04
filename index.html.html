@@ -10,6 +10,8 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <!-- Google Fonts Inter & Noto Sans TC -->
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <!-- LINE LIFF SDK -->
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 
   <script>
     tailwind.config = {
@@ -53,7 +55,7 @@
           <h1 class="font-bold text-lg leading-tight">市集隨手記</h1>
           <p class="text-xs text-emerald-200 flex items-center gap-1.5">
             <span id="sync-status-indicator" class="w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block"></span>
-            <span id="sync-status-text">雲端管理</span>
+            <span id="sync-status-text">LIFF 雲端管理</span>
           </p>
         </div>
       </div>
@@ -280,12 +282,24 @@
 
   <!-- Main Logic Script -->
   <script>
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxk4VRi65F81mUc4vFKiAxc9okM7-OSs87rGRR3Aup7d31sV2bEqI2yMfBTuqR8wt5t/exec";
+    const GOOGLE_SCRIPT_URL = "https://liff.line.me/2012360315-B0qoMtVC";
+    const LIFF_ID = "YOUR_LIFF_ID"; // 請替換成您在 LINE Developers 取得的 LIFF ID
 
     let products = [];
     let transactions = [];
 
     window.onload = function() {
+      // 初始化 LINE LIFF
+      if (window.liff) {
+        liff.init({ liffId: LIFF_ID })
+          .then(() => {
+            console.log("LIFF 初始化成功");
+          })
+          .catch((err) => {
+            console.error("LIFF 初始化失敗:", err);
+          });
+      }
+
       loadCloudData();
 
       window.onfocus = function() {
@@ -705,7 +719,7 @@
 
       if (isOnline) {
         indicator.className = 'w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block';
-        textSpan.innerText = text || '雲端管理';
+        textSpan.innerText = text || 'LIFF 雲端管理';
         footerStatus.innerText = '同步雲端';
       } else {
         indicator.className = 'w-2.5 h-2.5 rounded-full bg-amber-400 inline-block';
